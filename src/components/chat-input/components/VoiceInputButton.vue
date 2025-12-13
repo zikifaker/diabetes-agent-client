@@ -1,0 +1,303 @@
+<template>
+  <div class="voice-input-container">
+    <transition name="fade">
+      <div v-if="error" class="voice-error">
+        {{ error }}
+      </div>
+    </transition>
+    <button @click="toggleVoiceInput" class="btn-voice" :class="{ 'listening': isListening }"
+      :title="isListening ? '停止语音输入' : '语音输入'" :aria-label="isListening ? '停止语音输入' : '开始语音输入'" :disabled="!isSupported">
+      <span v-if="isListening" class="pulse-animation"></span>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+        <path d="M12 1C10.34 1 9 2.34 9 4V12C9 13.66 10.34 15 12 15C13.66 15 15 13.66 15 12V4C15 2.34 13.66 1 12 1Z"
+          :fill="isListening ? '#ef4444' : 'currentColor'" :style="{ transition: 'fill 0.3s ease' }" />
+        <path
+          d="M17 11C17 14.31 14.31 17 11 17H13C13 17 13 17 13 17M7 11C7 14.31 9.69 17 13 17H11C11 17 11 17 11 17M12 17V21M8 21H16"
+          :stroke="isListening ? '#ef4444' : 'currentColor'" stroke-width="1.5" stroke-linecap="round"
+          :style="{ transition: 'stroke 0.3s ease' }" />
+      </svg>
+    </button>
+  </div>
+</template>
+
+<script setup>
+import { ref, onMounted, onUnmounted, watch } from 'vue'
+import api from '@/services/api'
+import workletURL from '@/utils/recorder_worklet.js?url'
+
+const props = defineProps({
+  lang: {
+    type: String,
+    default: 'zh-CN'
+  },
+  isListening: {
+    type: Boolean,
+    default: false
+  },
+  errorTimeout: {
+    type: Number,
+    default: 3000
+  }
+})
+
+const emit = defineEmits(['result', 'update:isListening'])
+
+const isListening = ref(props.isListening)
+const isSupported = ref(true)
+const error = ref(null)
+
+let mediaRecorder = null
+let audioChunks = []
+let audioContext = null
+let workletNode = null
+let audioData = []
+let errorTimer = null
+
+const toggleVoiceInput = () => {
+  isListening.value ? stopListening() : startListening()
+}
+
+const startListening = async () => {
+  try {
+    const sampleRate = 16000
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        sampleRate: sampleRate,
+        channelCount: 1,
+        echoCancellation: true,
+        noiseSuppression: true,
+      }
+    })
+
+    audioContext = new window.AudioContext({
+      sampleRate: sampleRate
+    })
+    await audioContext.audioWorklet.addModule(workletURL)
+
+    const source = audioContext.createMediaStreamSource(stream)
+    workletNode = new AudioWorkletNode(audioContext, 'recorder-processor')
+
+    workletNode.port.onmessage = (e) => {
+      audioData.push(e.data.buffer)
+    }
+
+    source.connect(workletNode)
+    workletNode.connect(audioContext.destination)
+
+    mediaRecorder = new MediaRecorder(stream)
+
+    mediaRecorder.ondataavailable = (event) => {
+      if (event.data.size > 0) {
+        audioChunks.push(event.data)
+      }
+    }
+
+    mediaRecorder.onstop = async () => {
+      source.disconnect()
+      workletNode.disconnect()
+
+      const wavBlob = createWavBlob(audioData, sampleRate)
+      await fetchVoiceRecognitionAPI(wavBlob)
+      audioChunks = []
+      audioData = []
+    }
+
+    mediaRecorder.start()
+    isListening.value = true
+    emit('update:isListening', true)
+  } catch (error) {
+    setError('无法访问麦克风')
+    console.error('Error accessing microphone:', error)
+  }
+}
+
+// 创建 PCM 编码的 WAV 文件
+function createWavBlob(pcmArrays, sampleRate) {
+  const pcmData = new Int16Array(pcmArrays.reduce((acc, val) => acc + val.length, 0))
+  let offset = 0
+  for (const chunk of pcmArrays) {
+    pcmData.set(chunk, offset)
+    offset += chunk.length
+  }
+
+  const wavData = new DataView(new ArrayBuffer(44 + pcmData.length * 2))
+
+  const writeString = (view, offset, string) => {
+    for (let i = 0; i < string.length; i++) {
+      view.setUint8(offset + i, string.charCodeAt(i))
+    }
+  }
+
+  writeString(wavData, 0, 'RIFF')
+  wavData.setUint32(4, 36 + pcmData.length * 2, true)
+  writeString(wavData, 8, 'WAVE')
+  writeString(wavData, 12, 'fmt ')
+  wavData.setUint32(16, 16, true)
+  wavData.setUint16(20, 1, true)
+  wavData.setUint16(22, 1, true)
+  wavData.setUint32(24, sampleRate, true)
+  wavData.setUint32(28, sampleRate * 2, true)
+  wavData.setUint16(32, 2, true)
+  wavData.setUint16(34, 16, true)
+  writeString(wavData, 36, 'data')
+  wavData.setUint32(40, pcmData.length * 2, true)
+
+  for (let i = 0; i < pcmData.length; i++) {
+    wavData.setInt16(44 + (i * 2), pcmData[i], true)
+  }
+
+  return new Blob([wavData], { type: 'audio/wav' })
+}
+
+const stopListening = () => {
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+    mediaRecorder.stop()
+  }
+  isListening.value = false
+  emit('update:isListening', false)
+}
+
+const fetchVoiceRecognitionAPI = async (audioBlob) => {
+  try {
+    const formData = new FormData()
+    formData.append('audio', audioBlob, 'recording.wav')
+
+    const response = await api.post('/voice-recognition', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        'Accept': 'application/json'
+      }
+    })
+
+    emit('result', [{
+      transcript: response.data.data?.text || ''
+    }])
+  } catch (error) {
+    setError('语音识别服务不可用')
+    console.error('Voice recognition API error:', error)
+  }
+}
+
+const setError = (message) => {
+  if (errorTimer) {
+    clearTimeout(errorTimer)
+    errorTimer = null
+  }
+
+  error.value = message
+
+  if (message && props.errorTimeout > 0) {
+    errorTimer = setTimeout(() => {
+      error.value = null
+      errorTimer = null
+    }, props.errorTimeout)
+  }
+}
+
+const cleanup = () => {
+  if (errorTimer) {
+    clearTimeout(errorTimer)
+    errorTimer = null
+  }
+
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+    mediaRecorder.stop()
+  }
+
+  isListening.value = false
+  error.value = null
+}
+
+onMounted(() => {
+  if (!navigator.mediaDevices || !window.MediaRecorder) {
+    isSupported.value = false
+    setError('浏览器不支持录音功能')
+  }
+})
+
+onUnmounted(() => {
+  cleanup()
+})
+
+watch(() => props.isListening, (newVal) => {
+  if (newVal !== isListening.value) {
+    newVal ? startListening() : stopListening()
+  }
+})
+</script>
+
+<style scoped>
+.voice-input-container {
+  position: relative;
+  display: inline-block;
+}
+
+.btn-voice {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  color: #4b5563;
+  transition: all 0.2s ease;
+}
+
+.btn-voice:hover:not(:disabled) {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.btn-voice:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-voice.listening {
+  color: #ef4444;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+  }
+
+  70% {
+    box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+  }
+}
+
+.voice-error {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #fef2f2;
+  color: #dc2626;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  white-space: nowrap;
+  margin-bottom: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>

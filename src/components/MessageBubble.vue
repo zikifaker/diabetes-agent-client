@@ -1,0 +1,394 @@
+<template>
+  <div class="message-wrapper" :class="message.role">
+    <div class="message-avatar">
+      <img v-if="message.role === 'human'" :src="userAvatar" alt="用户" />
+      <div v-else class="assistant-avatar">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round" />
+          <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round" />
+          <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round" />
+        </svg>
+      </div>
+    </div>
+
+    <div class="message-content">
+      <div class="message-header">
+        <span class="message-sender">{{ message.role === 'human' ? '用户' : 'AI Agent' }}</span>
+        <span class="message-time">{{ formatTime(message.created_at) }}</span>
+      </div>
+
+      <div v-if="message.role === 'ai' && message.immediate_steps" class="thinking-steps">
+        <div class="thinking-header" @click="toggleThinking">
+          <div class="thinking-title">
+            <div class="thinking-icon">
+              <template v-if="isThinking">
+                <span class="dot thinking"></span>
+                <span class="dot thinking"></span>
+                <span class="dot thinking"></span>
+              </template>
+              <template v-else>
+                <svg class="checkmark" viewBox="0 0 24 24" width="18" height="18">
+                  <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M5 13l4 4L19 7" />
+                </svg>
+              </template>
+            </div>
+            <span class="thinking-status">
+              {{ getThinkingStatus() }}
+            </span>
+          </div>
+          <svg :class="{ 'expanded': showThinking }" class="toggle-icon" width="16" height="16" viewBox="0 0 24 24"
+            fill="none">
+            <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" />
+          </svg>
+        </div>
+        <transition name="slide-fade">
+          <div v-if="showThinking" class="thinking-content">
+            <div class="thinking-text">{{ message.immediate_steps }}</div>
+          </div>
+        </transition>
+      </div>
+
+      <transition name="fade-in">
+        <div v-if="message.content" class="message-content-wrapper">
+          <div class="message-text" v-html="renderMarkdown(message.content)"></div>
+        </div>
+      </transition>
+
+      <div v-if="streaming && !message.content && message.immediate_steps" class="typing-wrapper">
+        <div class="typing-indicator">
+          <span class="dot"></span>
+          <span class="dot"></span>
+          <span class="dot"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { computed, ref } from 'vue'
+import { useAuthStore } from '@/stores/auth'
+import { marked } from 'marked'
+
+const props = defineProps({
+  message: Object,
+  streaming: Boolean
+})
+
+const authStore = useAuthStore()
+const showThinking = ref(true)
+
+marked.setOptions({
+  gfm: true,
+  breaks: true,
+  xhtml: true,
+  smartLists: true,
+  smartypants: true,
+})
+
+const userAvatar = computed(() => authStore.user?.avatar || '')
+
+const isThinking = computed(() => {
+  return props.streaming && !props.message.thinking_complete;
+});
+
+function formatTime(timestamp) {
+  if (!timestamp) return ''
+  const date = new Date(timestamp)
+  return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+}
+
+function getThinkingStatus() {
+  if (props.streaming && !props.message.thinking_complete) {
+    return '思考中'
+  }
+  return '思考完毕'
+}
+
+function toggleThinking() {
+  showThinking.value = !showThinking.value
+}
+
+function renderMarkdown(content) {
+  return marked(content)
+}
+</script>
+
+<style scoped>
+.message-wrapper {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.message-avatar {
+  flex-shrink: 0;
+}
+
+.message-avatar img {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+}
+
+.assistant-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.message-content {
+  flex: 1;
+  min-width: 800px;
+  max-width: 1000px;
+}
+
+.message-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.message-sender {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.message-time {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.message-text {
+  font-size: 15px;
+  line-height: 1.3;
+  color: var(--text-primary);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  text-align: left;
+  font-family:
+    "PingFang SC",
+    "Microsoft YaHei",
+    "Hiragino Sans GB",
+    "WenQuanYi Micro Hei",
+    "Noto Sans CJK SC",
+    "Source Han Sans SC",
+    "Noto Sans SC",
+    sans-serif;
+}
+
+.typing-indicator {
+  display: inline-block;
+  animation: blink 1s infinite;
+  color: var(--primary-color);
+  font-weight: bold;
+}
+
+.thinking-steps {
+  margin-bottom: 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.thinking-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background-color: var(--bg-secondary);
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid transparent;
+}
+
+.thinking-header:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.thinking-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.thinking-icon {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 18px;
+}
+
+.thinking-icon .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--primary-color);
+  opacity: 0.6;
+}
+
+.thinking-icon .dot.thinking {
+  animation: bounce 1.4s infinite ease-in-out both;
+}
+
+.thinking-icon .dot.thinking:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.thinking-icon .dot.thinking:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+.thinking-icon .checkmark {
+  color: var(--success-color, #10B981);
+  opacity: 0.9;
+}
+
+.thinking-content {
+  padding: 0 16px 16px;
+  background-color: var(--bg-primary);
+  color: var(--text-secondary);
+  line-height: 1.6;
+  font-size: 14px;
+  border-top: 1px solid var(--border-color);
+}
+
+.thinking-text {
+  padding: 12px;
+  background-color: rgba(255, 255, 255, 0.02);
+  border-radius: 6px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  position: relative;
+  overflow: hidden;
+}
+
+.thinking-text::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(var(--primary-color-rgb), 0.3),
+      transparent);
+  animation: shine 3s infinite;
+}
+
+.typing-wrapper {
+  padding: 8px 0;
+}
+
+.typing-indicator {
+  display: flex;
+  gap: 6px;
+  padding: 12px 16px;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  width: fit-content;
+}
+
+.typing-indicator .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--primary-color);
+  opacity: 0.6;
+  animation: bounce 1.4s infinite ease-in-out both;
+}
+
+.typing-indicator .dot:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.typing-indicator .dot:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+.message-content-wrapper {
+  position: relative;
+  padding: 8px 0;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes bounce {
+
+  0%,
+  80%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.5;
+  }
+
+  40% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+
+@keyframes shine {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  20% {
+    transform: translateX(100%);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-fade-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.slide-fade-leave-active {
+  transition: all 0.2s cubic-bezier(1, 0.5, 0.8, 1);
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: translateY(-5px);
+  opacity: 0;
+}
+
+.fade-in-enter-active {
+  animation: fadeIn 0.4s ease-out;
+}
+</style>
