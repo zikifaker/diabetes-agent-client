@@ -70,14 +70,14 @@ const isListening = ref(false)
 
 const llmOptions = ref([
   {
-    id: 'qwen-plus',
-    name: '通义千问-Plus',
-    description: '适合中等复杂任务'
-  },
-  {
     id: 'qwen3-max',
     name: '通义千问3-max',
     description: '适配复杂场景，达到领域 SOTA 水平'
+  },
+  {
+    id: 'deepseek-v3.2',
+    name: 'DeepSeek-V3.2',
+    description: 'DeepSeek最新模型'
   }
 ])
 
