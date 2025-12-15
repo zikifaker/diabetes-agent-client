@@ -35,15 +35,28 @@
       <div v-for="session in sessionStore.sessions" :key="session.id" class="session-item"
         :class="{ active: session.id == route.params.id }" @click="selectSession(session)">
         <div class="session-info">
-          <span class="session-title">{{ session.title }}</span>
+          <input v-if="editingSessionId === session.id" v-model="editingTitle" class="session-title-input"
+            @keydown.enter="confirmRename(session)" @keydown.esc="cancelRename" @blur="confirmRename(session)"
+            ref="renameInput" />
+          <span v-else class="session-title">
+            {{ session.title }}
+          </span>
         </div>
-        <button @click.stop="deleteSession(session.id)" class="btn-delete">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M3 6H5H21M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-        </button>
+
+        <div class="session-actions">
+          <button class="btn-more" @click.stop="toggleSessionMenu(session.id)" aria-label="会话菜单">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="6" r="1.5" fill="currentColor" />
+              <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+              <circle cx="12" cy="18" r="1.5" fill="currentColor" />
+            </svg>
+          </button>
+
+          <div v-if="activeMenu === session.id" class="session-menu">
+            <button class="menu-item" @click.stop="startRename(session)">重命名</button>
+            <button class="menu-item delete" @click.stop="deleteSession(session.id)">删除</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -102,7 +115,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useSessionStore } from '@/stores/session'
@@ -119,8 +132,14 @@ const authStore = useAuthStore()
 const sessionStore = useSessionStore()
 
 const showUserMenu = ref(false)
+
 const showDeleteModal = ref(false)
 const sessionToDelete = ref(null)
+
+const activeMenu = ref(null)
+const editingSessionId = ref(null)
+const editingTitle = ref('')
+const renameInput = ref(null)
 
 function toggleUserMenu() {
   showUserMenu.value = !showUserMenu.value
@@ -131,7 +150,12 @@ function selectSession(session) {
   router.push(`/chat/${session.id}`)
 }
 
+function toggleSessionMenu(id) {
+  activeMenu.value = activeMenu.value === id ? null : id
+}
+
 function deleteSession(id) {
+  activeMenu.value = null
   sessionToDelete.value = id
   showDeleteModal.value = true
 }
@@ -144,12 +168,46 @@ async function confirmDelete() {
     }
     showDeleteModal.value = false
     sessionToDelete.value = null
+    activeMenu.value = null
   }
 }
 
 function cancelDelete() {
   showDeleteModal.value = false
   sessionToDelete.value = null
+  activeMenu.value = null
+}
+
+function startRename(session) {
+  activeMenu.value = null
+  editingSessionId.value = session.id
+  editingTitle.value = session.title
+
+  nextTick(() => {
+    renameInput.value?.focus()
+    renameInput.value?.select()
+  })
+}
+
+async function confirmRename(session) {
+  if (!editingTitle.value.trim()) {
+    cancelRename()
+    return
+  }
+
+  if (editingTitle.value !== session.title) {
+    await sessionStore.updateSessionTitle(
+      session.id,
+      editingTitle.value.trim()
+    )
+  }
+
+  cancelRename()
+}
+
+function cancelRename() {
+  editingSessionId.value = null
+  editingTitle.value = ''
 }
 
 function handleLogout() {
@@ -180,8 +238,8 @@ onUnmounted(() => {
   border-right: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
-  transition: var(--transition);
   height: 100vh;
+  transition: var(--transition);
 }
 
 .sidebar.hidden {
@@ -205,16 +263,6 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 10px;
-}
-
-.menu-icon {
-  flex-shrink: 0;
-}
-
-.menu-text {
-  font-size: 0.85rem;
-  color: var(--text-primary);
-  font-weight: 500;
 }
 
 .btn-new-chat {
@@ -250,10 +298,6 @@ onUnmounted(() => {
   background-color: var(--bg-hover);
 }
 
-.btn-text {
-  line-height: 1;
-}
-
 .sessions-list {
   margin-top: -15px;
   flex: 1;
@@ -270,6 +314,7 @@ onUnmounted(() => {
   gap: 10px;
   border-radius: 6px;
   margin: 2px 0;
+  position: relative;
 }
 
 .session-item:hover {
@@ -282,20 +327,12 @@ onUnmounted(() => {
   font-weight: 500;
 }
 
-.session-item.active .session-title {
-  color: var(--primary-color);
-}
-
 .session-info {
   display: flex;
   align-items: center;
   gap: 10px;
   flex: 1;
   min-width: 0;
-}
-
-.session-info svg {
-  flex-shrink: 0;
 }
 
 .session-title {
@@ -305,19 +342,79 @@ onUnmounted(() => {
   font-size: 0.85rem;
 }
 
-.btn-delete {
-  opacity: 0;
-  padding: 4px;
-  color: var(--text-secondary);
-  transition: var(--transition);
+.session-item.active .session-title {
+  color: var(--primary-color);
 }
 
-.session-item:hover .btn-delete {
+.session-actions {
+  position: relative;
+}
+
+.btn-more {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  color: var(--text-secondary);
+  opacity: 0;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.session-item:hover .btn-more,
+.session-item.active .btn-more {
   opacity: 1;
 }
 
-.btn-delete:hover {
+.btn-more:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.session-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  transform: none;
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 4px 0;
+  min-width: 120px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  border: 1px solid var(--border-color);
+  z-index: 1000;
+}
+
+.menu-item {
+  width: 100%;
+  padding: 8px 12px;
+  background: none;
+  border: none;
+  text-align: left;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.menu-item:hover {
+  background: var(--bg-hover);
+}
+
+.menu-item.delete {
   color: #dc2626;
+}
+
+.session-title-input {
+  width: 100%;
+  font-size: 0.85rem;
+  padding: 2px 4px;
+  border-radius: 4px;
+  border: 1px solid var(--primary-color);
+  outline: none;
 }
 
 .sidebar-footer {
@@ -338,6 +435,9 @@ onUnmounted(() => {
   border-radius: var(--radius);
   transition: var(--transition);
   text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
 }
 
 .user-button:hover {
@@ -389,12 +489,6 @@ onUnmounted(() => {
   color: var(--text-primary);
 }
 
-.user-email {
-  font-size: 13px;
-  color: var(--text-secondary);
-  margin-top: 2px;
-}
-
 .dropdown-divider {
   height: 1px;
   background: var(--border-color);
@@ -410,6 +504,9 @@ onUnmounted(() => {
   font-size: 14px;
   transition: var(--transition);
   text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
 }
 
 .dropdown-item:hover {
@@ -523,6 +620,20 @@ onUnmounted(() => {
 
 .btn-delete-confirm:hover {
   background: #dc2626;
+}
+
+.menu-icon {
+  flex-shrink: 0;
+}
+
+.menu-text {
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.btn-text {
+  line-height: 1;
 }
 
 @media (max-width: 768px) {

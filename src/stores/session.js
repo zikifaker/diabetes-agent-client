@@ -49,6 +49,17 @@ export const useSessionStore = defineStore('session', () => {
     }))
   }
 
+  async function updateSessionTitle(id, title) {
+    await api.put(`/session/${id}/title`, {
+      session_id: id,
+      title: title
+    })
+    const session = sessions.value.find(s => s.id === id)
+    if (session) {
+      session.title = title
+    }
+  }
+
   function setCurrentSession(session) {
     currentSession.value = session
   }
@@ -65,6 +76,7 @@ export const useSessionStore = defineStore('session', () => {
     createSession,
     deleteSession,
     fetchMessages,
+    updateSessionTitle,
     setCurrentSession,
     addMessage
   }
