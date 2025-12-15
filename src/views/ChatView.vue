@@ -13,14 +13,16 @@
         <h4>{{ sessionStore.currentSession?.title || '新会话' }}</h4>
       </div>
 
-      <div class="messages-container" ref="messagesContainer">
-        <div v-if="sessionStore.messages.length === 0" class="empty-messages">
-          <p>开始体验 Diabetes Agent</p>
+      <div class="messages-scroll" ref="messagesContainer" @scroll="handleScroll">
+        <div class="messages-container">
+          <div v-if="sessionStore.messages.length === 0" class="empty-messages">
+            <p>开始体验 Diabetes Agent</p>
+          </div>
+
+          <MessageBubble v-for="message in sessionStore.messages" :key="message.id" :message="message" />
+
+          <MessageBubble v-if="streamingMessage" :message="streamingMessage" :streaming="true" />
         </div>
-
-        <MessageBubble v-for="message in sessionStore.messages" :key="message.id" :message="message" />
-
-        <MessageBubble v-if="streamingMessage" :message="streamingMessage" :streaming="true" />
       </div>
 
       <ChatInput @send="handleSend" :loading="isLoading" />
@@ -44,6 +46,7 @@ const sidebarVisible = ref(true)
 const isLoading = ref(false)
 const streamingMessage = ref(null)
 const messagesContainer = ref(null)
+const autoScrollEnabled = ref(true)
 
 function toggleSidebar() {
   sidebarVisible.value = !sidebarVisible.value
@@ -144,7 +147,6 @@ async function handleSend(data) {
       }
 
       await nextTick()
-
       scrollToBottom()
     }
   } catch (error) {
@@ -171,7 +173,7 @@ function handleStreamEvent(event) {
       if (!streamingMessage.value.thinking_complete && streamingMessage.value.immediate_steps) {
         streamingMessage.value.thinking_complete = true
       }
-      sessionStore.addMessage({ ...streamingMessage.value })
+      sessionStore.addMessage(streamingMessage.value)
       streamingMessage.value = null
       break
     case 'error':
@@ -189,9 +191,24 @@ function handleStreamEvent(event) {
 }
 
 function scrollToBottom() {
-  if (messagesContainer.value) {
-    messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
-  }
+  if (!autoScrollEnabled.value) return
+
+  const el = messagesContainer.value
+  if (!el) return
+
+  el.scrollTop = el.scrollHeight
+}
+
+function handleScroll() {
+  const el = messagesContainer.value
+  if (!el) return
+
+  // 用户不在底部时禁止自动滚动
+  autoScrollEnabled.value = isNearBottom(el)
+}
+
+function isNearBottom(el, threshold = 20) {
+  return el.scrollHeight - el.scrollTop - el.clientHeight <= threshold
 }
 
 onMounted(async () => {
@@ -270,14 +287,30 @@ watch(() => route.params.id, async (newId) => {
   color: var(--text-primary);
 }
 
-.messages-container {
+.messages-scroll {
   flex: 1;
   overflow-y: auto;
-  padding: 24px;
+  padding: 24px 0;
+  scrollbar-width: thin;
+}
+
+.messages-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.messages-scroll::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.messages-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.messages-container {
   max-width: 1000px;
   margin: 0 auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  padding: 0 24px;
 }
 
 .messages-container::-webkit-scrollbar {
