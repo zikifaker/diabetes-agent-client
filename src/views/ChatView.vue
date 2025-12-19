@@ -25,13 +25,13 @@
         </div>
       </div>
 
-      <ChatInput @send="handleSend" :loading="isLoading" />
+      <ChatInput @send="handleSend" @stop="handleStop" :loading="isLoading" />
     </main>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, watch, nextTick } from 'vue'
+import { ref, onMounted, watch, nextTick, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useSessionStore } from '@/stores/session'
 import Sidebar from '@/components/Sidebar.vue'
@@ -47,6 +47,7 @@ const isLoading = ref(false)
 const streamingMessage = ref(null)
 const messagesContainer = ref(null)
 const autoScrollEnabled = ref(true)
+const abortController = ref(null)
 
 function toggleSidebar() {
   sidebarVisible.value = !sidebarVisible.value
@@ -65,6 +66,7 @@ async function handleSend(data) {
     return
   }
 
+  abortController.value = new AbortController()
   isLoading.value = true
 
   const userMessage = {
@@ -105,7 +107,8 @@ async function handleSend(data) {
     const response = await fetch('http://localhost:8088/api/chat', {
       method: 'POST',
       headers,
-      body
+      body,
+      signal: abortController.value.signal
     })
 
     const reader = response.body.getReader()
@@ -150,9 +153,20 @@ async function handleSend(data) {
       scrollToBottom()
     }
   } catch (error) {
-    console.error('Error processing chat stream response:', error)
+    if (error.name === 'AbortError') {
+      console.log('Request was cancelled by user')
+
+      if (streamingMessage.value) {
+        streamingMessage.value.content += '\n\n[生成已停止]'
+        sessionStore.addMessage(streamingMessage.value)
+        streamingMessage.value = null
+      }
+    } else {
+      console.error('Error processing chat stream response:', error)
+    }
   } finally {
     isLoading.value = false
+    abortController.value = null
   }
 }
 
@@ -163,12 +177,14 @@ function handleStreamEvent(event) {
     case 'immediate_steps':
       streamingMessage.value.immediate_steps += event.content
       break
+
     case 'final_answer':
       if (!streamingMessage.value.thinking_complete && streamingMessage.value.immediate_steps) {
         streamingMessage.value.thinking_complete = true
       }
       streamingMessage.value.content += event.content
       break
+
     case 'done':
       if (!streamingMessage.value.thinking_complete && streamingMessage.value.immediate_steps) {
         streamingMessage.value.thinking_complete = true
@@ -176,13 +192,13 @@ function handleStreamEvent(event) {
       sessionStore.addMessage(streamingMessage.value)
       streamingMessage.value = null
       break
+
     case 'error':
-      const errorMessage = event.content
       sessionStore.addMessage({
         id: Date.now() + 1,
         created_at: new Date().toISOString(),
         role: 'ai',
-        content: errorMessage,
+        content: "系统错误，请稍后重试",
       })
       console.error('Stream error:', event.content)
       streamingMessage.value = null
@@ -211,6 +227,12 @@ function isNearBottom(el, threshold = 20) {
   return el.scrollHeight - el.scrollTop - el.clientHeight <= threshold
 }
 
+function handleStop() {
+  if (abortController.value) {
+    abortController.value.abort()
+  }
+}
+
 onMounted(async () => {
   try {
     const sessionId = route.params.id
@@ -226,6 +248,23 @@ onMounted(async () => {
   } catch (error) {
     console.error('Error fetching session messages:', error)
   }
+})
+
+onMounted(() => {
+  const handleBeforeUnload = (e) => {
+    // 当内容正在生成中时，阻止默认的页面卸载行为
+    if (isLoading.value) {
+      e.preventDefault()
+      e.returnValue = ''
+      return e.returnValue
+    }
+  }
+
+  window.addEventListener('beforeunload', handleBeforeUnload)
+
+  onBeforeUnmount(() => {
+    window.removeEventListener('beforeunload', handleBeforeUnload)
+  })
 })
 
 watch(() => route.params.id, async (newId) => {

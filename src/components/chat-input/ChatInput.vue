@@ -33,13 +33,22 @@
           <div class="right-controls">
             <VoiceInputButton v-model:isListening="isListening" @result="handleVoiceResult" class="voice-input-btn" />
 
-            <button @click="handleSend" class="btn-send" :disabled="loading || !message.trim()"
-              :title="message.trim() ? '发送消息' : '请输入消息内容'" :aria-label="message.trim() ? '发送消息' : '请输入消息内容'">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke="currentColor" stroke-width="2"
-                  stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
-            </button>
+            <div class="tooltip-container">
+              <button v-if="!loading" @click="handleSend" class="btn-send" :disabled="!message.trim()"
+                :aria-label="message.trim() ? '发送消息' : '请输入消息内容'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                <span class="tooltip">发送消息</span>
+              </button>
+              <button v-else @click="handleStop" class="btn-stop" aria-label="停止生成">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <rect x="6" y="6" width="12" height="12" rx="1" fill="currentColor" />
+                </svg>
+                <span class="tooltip">停止生成</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -64,7 +73,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['send'])
+const emit = defineEmits(['send', 'stop'])
 
 const message = ref('')
 const showConfig = ref(false)
@@ -128,6 +137,10 @@ function handleSend() {
       textareaRef.value.style.minHeight = '24px'
     }
   })
+}
+
+function handleStop() {
+  emit('stop')
 }
 
 function autoResize() {
@@ -269,6 +282,10 @@ onMounted(() => {
   }
 }
 
+.btn-config:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
 .tooltip {
   visibility: hidden;
   width: auto;
@@ -302,12 +319,6 @@ onMounted(() => {
   }
 }
 
-.btn-config:hover .tooltip {
-  visibility: visible;
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
-
 .btn-send {
   width: 32px;
   height: 32px;
@@ -323,17 +334,46 @@ onMounted(() => {
 }
 
 .btn-send:disabled {
-  background: var(--border-color);
+  background: var(--primary-color);
   cursor: not-allowed;
   opacity: 0.6;
 }
 
-.btn-config:hover {
-  background: rgba(0, 0, 0, 0.04);
+.btn-stop {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #f44336;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
 }
 
+.btn-stop:hover {
+  background-color: #d32f2f;
+}
+
+.btn-stop:disabled {
+  background-color: #e0e0e0;
+  color: #9e9e9e;
+  cursor: not-allowed;
+}
+
+.btn-config:hover .tooltip,
+.btn-send:hover .tooltip,
+.btn-stop:hover .tooltip {
+  visibility: visible;
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.btn-config:focus,
 .btn-send:focus,
-.btn-config:focus {
+.btn-stop:focus {
   outline: none;
   box-shadow: none;
 }
