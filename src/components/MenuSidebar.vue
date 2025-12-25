@@ -384,7 +384,6 @@ onUnmounted(() => {
 
 .session-menu {
   position: absolute;
-  top: calc(100% + 6px);
   right: 0;
   transform: none;
   background: #ffffff;
@@ -402,7 +401,7 @@ onUnmounted(() => {
   background: none;
   border: none;
   text-align: left;
-  font-size: 14px;
+  font-size: 12px;
   cursor: pointer;
   transition: background-color 0.2s;
 }

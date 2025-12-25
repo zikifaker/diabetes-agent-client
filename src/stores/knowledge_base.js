@@ -92,6 +92,18 @@ export const useKnowledgeBaseStore = defineStore('knowledgeBase', () => {
     }
   }
 
+  async function fetchFileDownloadLink(fileName) {
+    try {
+      const response = await api.get('/kb/download-link', {
+        params: { 'file-name': fileName }
+      })
+      
+      return response.data.data.url
+    } catch (error) {
+      throw error
+    }
+  }
+
   return {
     knowledgeFiles,
     loading,
@@ -99,6 +111,7 @@ export const useKnowledgeBaseStore = defineStore('knowledgeBase', () => {
     fetchFiles,
     uploadFile,
     deleteFile,
+    fetchFileDownloadLink,
     validateFileType
   }
 })

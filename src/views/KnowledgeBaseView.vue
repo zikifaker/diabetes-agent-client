@@ -10,15 +10,19 @@
           </svg>
           搜索文件
         </button>
-        <button class="action-btn upload-btn" @click="triggerFileUpload" :disabled="uploading"
-          title="支持单次上传不超过10个文件，每个文件不超过100MB">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-            <polyline points="17 8 12 3 7 8"></polyline>
-            <line x1="12" y1="3" x2="12" y2="15"></line>
-          </svg>
-          {{ uploading ? '上传中...' : '上传文件' }}
-        </button>
+
+        <div class="tooltip-container">
+          <button class="action-btn upload-btn" @click="triggerFileUpload" :disabled="uploading">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            {{ uploading ? '上传中...' : '上传文件' }}
+          </button>
+          <div class="tooltip">支持单次上传不超过 10 个文件<br />单个文件不超过 100MB</div>
+        </div>
+
         <input ref="fileInput" type="file" @change="handleFileUpload" accept=".pdf,.md,.txt" style="display: none"
           multiple />
       </div>
@@ -43,13 +47,18 @@
 
       <div v-else class="files-grid">
         <div v-for="file in knowledgeFiles" :key="file.fileName" class="file-card">
-          <div class="card-actions">
-            <button @click.stop="handleDeleteClick(file.fileName)" class="delete-button">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2m-6 5v6m4-6v6"
-                  stroke-linecap="round" stroke-linejoin="round" />
+          <div class="card-actions" :class="{ 'menu-open': activeFileMenu === file.fileName }">
+            <button class="menu-trigger" @click.stop="toggleFileMenu(file.fileName)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <circle cx="12" cy="5" r="1.5" />
+                <circle cx="12" cy="12" r="1.5" />
+                <circle cx="12" cy="19" r="1.5" />
               </svg>
             </button>
+            <div v-if="activeFileMenu === file.fileName" class="file-menu">
+              <div class="menu-item" @click="handleDownload(file.fileName)">下载</div>
+              <div class="menu-item danger" @click="handleDelete(file.fileName)">删除</div>
+            </div>
           </div>
           <div>
             <div v-if="file.fileType === 'pdf'" class="file-thumbnail pdf-thumbnail">
@@ -112,33 +121,16 @@ import { storeToRefs } from 'pinia'
 const knowledgeBaseStore = useKnowledgeBaseStore()
 const { knowledgeFiles, loading, uploading } = storeToRefs(knowledgeBaseStore)
 
-const fileInput = ref(null)
-const showDeleteModal = ref(false)
-const fileToDelete = ref(null)
 const showSearchModal = ref(false)
+const fileInput = ref(null)
+const fileToDelete = ref(null)
+const showDeleteModal = ref(false)
+const activeFileMenu = ref(null)
+
 const toast = ref({
   show: false,
   message: '',
   type: 'success'
-})
-
-function showToast(message, type = 'success') {
-  toast.value = {
-    show: true,
-    message,
-    type
-  }
-  setTimeout(() => {
-    toast.value.show = false
-  }, 1000)
-}
-
-onMounted(async () => {
-  try {
-    await knowledgeBaseStore.fetchFiles()
-  } catch (error) {
-    console.error('Failed to fetch knowledge metadata:', error)
-  }
 })
 
 function triggerFileUpload() {
@@ -198,6 +190,50 @@ async function handleFileUpload(event) {
   }
 }
 
+function showToast(message, type = 'success') {
+  toast.value = {
+    show: true,
+    message,
+    type
+  }
+  setTimeout(() => {
+    toast.value.show = false
+  }, 1500)
+}
+
+function toggleFileMenu(fileName) {
+  activeFileMenu.value =
+    activeFileMenu.value === fileName ? null : fileName
+}
+
+async function handleDownload(fileName) {
+  activeFileMenu.value = null
+
+  try {
+    const downloadLink = await knowledgeBaseStore.fetchFileDownloadLink(fileName)
+    
+    // 在新标签页打开链接
+    const link = document.createElement('a')
+    link.href = downloadLink
+    link.target = '_blank'
+    link.rel = 'noopener noreferrer'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    
+    showToast('文件下载成功', 'success')
+  } catch (error) {
+    console.error('Failed to download file:', error)
+    showToast('文件下载失败', 'error')
+  }
+}
+
+function handleDelete(fileName) {
+  activeFileMenu.value = null
+  fileToDelete.value = fileName
+  showDeleteModal.value = true
+}
+
 function getFileExtension(filename) {
   return filename.split('.').pop().toUpperCase();
 }
@@ -210,9 +246,9 @@ function formatFileSize(bytes) {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
-function handleDeleteClick(fileName) {
-  fileToDelete.value = fileName
-  showDeleteModal.value = true
+function cancelDelete() {
+  showDeleteModal.value = false
+  fileToDelete.value = null
 }
 
 async function confirmDelete() {
@@ -229,9 +265,18 @@ async function confirmDelete() {
   }
 }
 
-function cancelDelete() {
-  showDeleteModal.value = false
-  fileToDelete.value = null
+onMounted(async () => {
+  document.addEventListener('click', handleGlobalClick)
+
+  try {
+    await knowledgeBaseStore.fetchFiles()
+  } catch (error) {
+    console.error('Failed to fetch knowledge metadata:', error)
+  }
+})
+
+function handleGlobalClick() {
+  activeFileMenu.value = null
 }
 </script>
 
@@ -291,6 +336,50 @@ function cancelDelete() {
   background: var(--primary-color);
   color: var(--white);
   border-color: var(--primary-color);
+}
+
+.tooltip-container {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip {
+  visibility: hidden;
+  min-width: 60px;
+  background-color: var(--color-tooltip-bg, #333);
+  color: var(--color-tooltip-text, #fff);
+  text-align: center;
+  border-radius: 4px;
+  padding: 4px 8px;
+  position: absolute;
+  z-index: 50;
+  top: 125%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-5px);
+  opacity: 0;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tooltip-container:hover .tooltip {
+  visibility: visible;
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.tooltip::after {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent transparent var(--color-tooltip-bg, #333) transparent;
 }
 
 .content {
@@ -366,23 +455,56 @@ function cancelDelete() {
   right: 4px;
   z-index: 10;
   opacity: 0;
+  transition: opacity 0.15s ease;
 }
 
 .file-card:hover .card-actions {
   opacity: 1;
 }
 
-.delete-button {
+.card-actions.menu-open {
+  opacity: 1;
+}
+
+.menu-trigger {
   background: none;
   border: none;
-  color: #000000;
   cursor: pointer;
   padding: 4px;
   border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
+  color: #374151;
+}
+
+.menu-trigger:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.file-menu {
+  position: absolute;
+  right: 0;
+  transform: none;
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 4px;
+  min-width: 80px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  border: 1px solid var(--border-color);
+  z-index: 20;
+}
+
+.menu-item {
+  padding: 3px 6px;
+  font-size: 11px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.menu-item:hover {
+  background-color: #f6f5f3c5;
+}
+
+.menu-item.danger {
+  color: #ef4444;
 }
 
 .file-thumbnail {
