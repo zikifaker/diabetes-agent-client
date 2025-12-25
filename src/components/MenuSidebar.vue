@@ -36,8 +36,7 @@
         :class="{ active: session.id == route.params.id }" @click="selectSession(session)">
         <div class="session-info">
           <input v-if="editingSessionId === session.id" v-model="editingTitle" class="session-title-input"
-            @keydown.enter="confirmRename(session)" @keydown.esc="cancelRename" @blur="confirmRename(session)"
-            ref="renameInput" />
+            @keydown.enter="confirmRename(session)" @keydown.esc="cancelRename" ref="renameInput" />
           <span v-else class="session-title">
             {{ session.title }}
           </span>
@@ -218,6 +217,14 @@ function handleLogout() {
 function handleClickOutside(event) {
   if (showUserMenu.value && !event.target.closest('.user-menu')) {
     showUserMenu.value = false
+  }
+
+  if (activeMenu.value && !event.target.closest('.session-actions')) {
+    activeMenu.value = null
+  }
+
+  if (editingSessionId.value && !event.target.closest('.session-title-input')) {
+    cancelRename()
   }
 }
 
@@ -401,7 +408,7 @@ onUnmounted(() => {
 }
 
 .menu-item:hover {
-  background: var(--bg-hover);
+  background-color: rgba(0, 0, 0, 0.04);
 }
 
 .menu-item.delete {

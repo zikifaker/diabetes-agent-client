@@ -65,8 +65,7 @@ function toggleSidebar() {
 }
 
 async function handleNewChat() {
-  const session = await sessionStore.createSession()
-  router.push(`/chat/${session.id}`)
+  await sessionStore.createSession()
 }
 
 async function handleSend(data) {
