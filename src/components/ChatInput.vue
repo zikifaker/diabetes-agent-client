@@ -87,19 +87,11 @@ const selectedLLM = ref(llmOptions.value[0])
 const toolsOptions = ref([
   {
     label: '糖尿病知识图谱',
-    value: 'diabetes_knowledge_graph',
+    value: 'search_diabetes_knowledge_graph',
   },
   {
     label: '个人知识库',
-    value: 'user_knowledge_base',
-  },
-  {
-    label: '天气查询',
-    value: 'weather_search',
-  },
-  {
-    label: '计算器',
-    value: 'calculator',
+    value: 'search_user_knowledge_base',
   }
 ])
 

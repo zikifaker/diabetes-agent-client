@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import api from '@/services/api'
+import { NAMESPACE, getUploadPolicyToken, uploadToOSS } from '@/utils/oss'
 
 export const useKnowledgeBaseStore = defineStore('knowledgeBase', () => {
   const knowledgeFiles = ref([])
@@ -39,25 +40,10 @@ export const useKnowledgeBaseStore = defineStore('knowledgeBase', () => {
   async function uploadFile(file) {
     uploading.value = true
     try {
-      const { data: { data: policyToken } } = await api.get('/oss/policy-token')
+      const policyToken = await getUploadPolicyToken(file.name, NAMESPACE.KNOWLEDGE_BASE)
 
-      const formData = new FormData()
-      formData.append("success_action_status", "200")
-      formData.append("policy", policyToken.policy)
-      formData.append("x-oss-signature", policyToken.signature)
-      formData.append("x-oss-signature-version", "OSS4-HMAC-SHA256")
-      formData.append("x-oss-credential", policyToken.x_oss_credential)
-      formData.append("x-oss-date", policyToken.x_oss_date)
-      formData.append("key", policyToken.dir + file.name)
-      formData.append("x-oss-security-token", policyToken.security_token)
-      formData.append("file", file)
-
-      const uploadResponse = await fetch(policyToken.host, {
-        method: 'POST',
-        body: formData
-      })
-
-      if (!uploadResponse.ok) {
+      const response = await uploadToOSS(file, policyToken)
+      if (!response.ok) {
         throw new Error('failed to upload file to OSS')
       }
 
@@ -65,10 +51,8 @@ export const useKnowledgeBaseStore = defineStore('knowledgeBase', () => {
         file_name: file.name,
         file_type: file.name.split('.').pop().toLowerCase(),
         file_size: file.size,
-        object_name: policyToken.dir + file.name
+        object_name: policyToken.key
       })
-
-      await fetchFiles(true)
 
       return { success: true, message: '文件上传成功' }
     } catch (error) {
@@ -88,18 +72,6 @@ export const useKnowledgeBaseStore = defineStore('knowledgeBase', () => {
       knowledgeFiles.value = knowledgeFiles.value.filter(f => f.fileName !== fileName)
 
       return { success: true, message: '文件删除成功' }
-    } catch (error) {
-      throw error
-    }
-  }
-
-  async function fetchFileDownloadLink(fileName) {
-    try {
-      const response = await api.get('/kb/download-link', {
-        params: { 'file-name': fileName }
-      })
-
-      return response.data.data.url
     } catch (error) {
       throw error
     }
@@ -143,7 +115,6 @@ export const useKnowledgeBaseStore = defineStore('knowledgeBase', () => {
     fetchFiles,
     uploadFile,
     deleteFile,
-    fetchFileDownloadLink,
     searchFiles,
     resetFiles,
     validateFileType

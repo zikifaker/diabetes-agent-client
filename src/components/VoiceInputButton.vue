@@ -93,7 +93,7 @@ const startListening = async () => {
       source.disconnect()
       workletNode.disconnect()
 
-      const wavBlob = createWavBlob(audioData, sampleRate)
+      const wavBlob = createWAVBlob(audioData, sampleRate)
       await fetchVoiceRecognitionAPI(wavBlob)
       audioChunks = []
       audioData = []
@@ -109,7 +109,7 @@ const startListening = async () => {
 }
 
 // 创建 PCM 编码的 WAV 文件
-function createWavBlob(pcmArrays, sampleRate) {
+function createWAVBlob(pcmArrays, sampleRate) {
   const pcmData = new Int16Array(pcmArrays.reduce((acc, val) => acc + val.length, 0))
   let offset = 0
   for (const chunk of pcmArrays) {
@@ -191,7 +191,14 @@ const setError = (message) => {
   }
 }
 
-const cleanup = () => {
+onMounted(() => {
+  if (!navigator.mediaDevices || !window.MediaRecorder) {
+    isSupported.value = false
+    setError('浏览器不支持录音功能')
+  }
+})
+
+onUnmounted(() => {
   if (errorTimer) {
     clearTimeout(errorTimer)
     errorTimer = null
@@ -203,17 +210,6 @@ const cleanup = () => {
 
   isListening.value = false
   error.value = null
-}
-
-onMounted(() => {
-  if (!navigator.mediaDevices || !window.MediaRecorder) {
-    isSupported.value = false
-    setError('浏览器不支持录音功能')
-  }
-})
-
-onUnmounted(() => {
-  cleanup()
 })
 
 watch(() => props.isListening, (newVal) => {

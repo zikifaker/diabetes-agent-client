@@ -100,11 +100,11 @@ import { ref, onMounted } from 'vue'
 import { useKnowledgeBaseStore } from '@/stores/knowledge_base'
 import { storeToRefs } from 'pinia'
 import { SearchIcon, CloseSearchIcon, UploadIcon, EmptyStateIcon, MenuIcon, CloseIcon } from '@/components/icons'
+import { getFileDownloadLink } from '@/utils/oss'
 
 const knowledgeBaseStore = useKnowledgeBaseStore()
 const { knowledgeFiles, loading, uploading } = storeToRefs(knowledgeBaseStore)
 
-const showSearchModal = ref(false)
 const searchActive = ref(false)
 const searchQuery = ref('')
 
@@ -219,6 +219,13 @@ async function handleFileUpload(event) {
   } finally {
     event.target.value = ''
   }
+
+  // 上传成功后刷新文件列表
+  try {
+    await knowledgeBaseStore.fetchFiles(true)
+  } catch (error) {
+    console.error('Failed to fetch knowledge metadata:', error)
+  }
 }
 
 function showToast(message, type = 'success') {
@@ -241,7 +248,7 @@ async function handleDownload(fileName) {
   activeFileMenu.value = null
 
   try {
-    const downloadLink = await knowledgeBaseStore.fetchFileDownloadLink(fileName)
+    const downloadLink = await getFileDownloadLink(fileName)
 
     // 在新标签页打开链接
     const link = document.createElement('a')
