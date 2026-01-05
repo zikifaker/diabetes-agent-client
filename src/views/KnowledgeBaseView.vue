@@ -8,7 +8,7 @@
             @keyup.enter="handleSearch" />
 
           <button class="search-trigger" @click="handleSearchClick">
-            <CloseSearchIcon v-if="searchActive && searchQuery" @click.stop="clearSearch" />
+            <CloseIcon v-if="searchActive && searchQuery" @click.stop="clearSearch" />
             <SearchIcon v-else />
             <span v-if="!searchActive">搜索文件</span>
           </button>
@@ -99,7 +99,7 @@
 import { ref, onMounted } from 'vue'
 import { useKnowledgeBaseStore } from '@/stores/knowledge_base'
 import { storeToRefs } from 'pinia'
-import { SearchIcon, CloseSearchIcon, UploadIcon, EmptyStateIcon, MenuIcon, CloseIcon } from '@/components/icons'
+import { SearchIcon, CloseIcon, UploadIcon, EmptyStateIcon, MenuIcon } from '@/components/icons'
 import { getFileDownloadLink } from '@/utils/oss'
 
 const knowledgeBaseStore = useKnowledgeBaseStore()
