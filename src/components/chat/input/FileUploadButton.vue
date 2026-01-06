@@ -4,10 +4,23 @@
       <button @click="triggerFileInput" class="icon-button">
         <FileUploadIcon />
       </button>
-      <div class="tooltip">支持上传图片，单次至多 10 个文件，每个不超过 100MB</div>
+      <div class="tooltip">
+        支持 PNG / JPG / JEPG / GIF / WEBP / Word / PDF / Excel / txt / Markdown<br />单次上传至多 10 个文件，每个不超过 100MB
+      </div>
     </div>
-    <input type="file" ref="fileInput" @change="handleFileChange" multiple
-      accept="image/png, image/jpeg, image/gif, image/webp" style="display: none" />
+    <input type="file" ref="fileInput" @change="handleFileChange" style="display: none" accept="
+    image/png, .png,
+    image/jpeg, .jpg, .jpeg,
+    image/gif, .gif,
+    image/webp, .webp,
+    application/msword, .doc,
+    application/vnd.openxmlformats-officedocument.wordprocessingml.document, .docx,
+    application/pdf, .pdf,
+    application/vnd.ms-excel, .xls,
+    application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, .xlsx,
+    text/plain, .txt,
+    text/markdown, .md
+  " multiple>
   </div>
 </template>
 

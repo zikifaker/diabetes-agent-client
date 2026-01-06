@@ -93,7 +93,8 @@ async function handleSend(data) {
     thinking_complete: false,
     immediate_steps: '',
     tool_call_results: [],
-    content: ''
+    content: '',
+    uploaded_files: data.uploaded_files
   }
 
   const token = localStorage.getItem('token')
@@ -382,6 +383,7 @@ watch(() => route.params.id, async (newId) => {
   overflow-y: auto;
   padding: 24px 0;
   scrollbar-color: rgba(84, 143, 206, 0.25) transparent;
+  scrollbar-gutter: stable;
 }
 
 .messages-scroll::-webkit-scrollbar {

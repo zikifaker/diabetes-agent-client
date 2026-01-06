@@ -13,18 +13,25 @@
         <span class="message-time">{{ formatTime(message.created_at) }}</span>
       </div>
 
-      <div v-if="message.uploaded_files && message.uploaded_files.length > 0" class="uploaded-files">
+      <div v-if="message.role === 'human' && message.uploaded_files && message.uploaded_files.length > 0"
+        class="uploaded-files">
         <div v-for="(fileName, index) in message.uploaded_files" :key="index" class="file-message-card"
           @click="handleFileClick(fileName)">
-          <div class="tooltip">{{ fileName }}</div>
-
           <div class="file-type-icon" :class="getFileCategory(fileName)">
             <component :is="getFileIcon(fileName)" />
           </div>
-
           <div class="file-info">
             <div class="file-name">{{ fileName }}</div>
           </div>
+        </div>
+      </div>
+
+      <div v-if="isFileParsing" class="file-parsing-animation">
+        <div class="parsing-dots">
+          <span class="dot"></span>
+          <span class="dot"></span>
+          <span class="dot"></span>
+          <div class="parsing-text">解析文件中</div>
         </div>
       </div>
 
@@ -110,9 +117,17 @@ marked.setOptions({
 
 const userAvatar = computed(() => authStore.user?.avatar || '')
 
+const isFileParsing = computed(() => {
+  return (
+    props.message.role === 'ai' &&
+    props.message.uploaded_files?.length > 0 &&
+    !props.message.thinking_complete
+  )
+})
+
 const isThinking = computed(() => {
   return props.streaming && !props.message.thinking_complete;
-});
+})
 
 function formatTime(timestamp) {
   if (!timestamp) return ''
@@ -121,15 +136,15 @@ function formatTime(timestamp) {
 }
 
 const handleFileClick = async (fileName) => {
-  try{
+  try {
     const sessionId = route.params.id
     const downloadLink = await getFileDownloadLink(fileName, NAMESPACE.UPLOAD, sessionId)
-    
+
     const link = document.createElement('a')
     link.href = downloadLink
     link.target = '_blank'
     link.rel = 'noopener noreferrer'
-    
+
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
@@ -283,7 +298,7 @@ function showToolCalls() {
 }
 
 .thinking-steps {
-  margin-bottom: 16px;
+  margin: 16px 0;
   background-color: var(--bg-secondary);
   border-radius: 8px;
   overflow: hidden;
@@ -327,8 +342,8 @@ function showToolCalls() {
 }
 
 .thinking-icon .dot {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background-color: var(--primary-color);
   opacity: 0.6;
@@ -347,7 +362,7 @@ function showToolCalls() {
 }
 
 .thinking-content {
-  padding: 0 16px 16px;
+  padding: 8px;
   background-color: var(--bg-primary);
   color: var(--text-secondary);
   line-height: 1.6;
@@ -527,44 +542,6 @@ function showToolCalls() {
   cursor: pointer;
 }
 
-.tooltip {
-  width: auto;
-  min-width: 60px;
-  background-color: var(--color-tooltip-bg, #333);
-  color: var(--color-tooltip-text, #fff);
-  text-align: center;
-  border-radius: 4px;
-  padding: 8px 8px;
-  position: absolute;
-  z-index: 1;
-  bottom: 125%;
-  left: 50%;
-  transform: translateX(-50%) translateY(5px);
-  opacity: 0;
-  font-size: 12px;
-  font-weight: 500;
-  white-space: nowrap;
-  pointer-events: none;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-
-  &::after {
-    content: '';
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    margin-left: -5px;
-    border-width: 5px;
-    border-style: solid;
-    border-color: var(--color-tooltip-bg, #333) transparent transparent transparent;
-  }
-}
-
-.file-message-card:hover .tooltip {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
-
 .file-message-card:hover {
   background-color: var(--bg-tertiary);
 }
@@ -617,5 +594,66 @@ function showToolCalls() {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.file-parsing-animation {
+  margin: 12px 0;
+  padding: 0 12px;
+}
+
+.parsing-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: var(--bg-secondary, #f7f7f8);
+  border-radius: 18px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.parsing-dots {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 20px;
+}
+
+.parsing-dots .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--primary-color);
+  display: inline-block;
+  animation: bounce 1.4s infinite ease-in-out both;
+}
+
+.parsing-dots .dot:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.parsing-dots .dot:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+@keyframes bounce {
+
+  0%,
+  80%,
+  100% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.parsing-text {
+  color: var(--text-secondary, #6e6e80);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
 }
 </style>
