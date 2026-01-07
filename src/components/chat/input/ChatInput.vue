@@ -83,14 +83,14 @@ const uploadedFiles = ref([])
 
 const llmOptions = ref([
   {
-    id: 'qwen3-max',
+    id: 'qwen3-plus',
     name: '通义千问3-max',
     description: '适配复杂场景，达到领域 SOTA 水平'
   },
   {
-    id: 'qwen-flash',
-    name: '通义千问-Flash',
-    description: '小尺寸模型，快速响应'
+    id: 'glm-4.7',
+    name: 'GLM-4.7',
+    description: '智谱 AI 最新旗舰模型'
   }
 ])
 

@@ -7,7 +7,7 @@
         <div class="chat-area">
           <div class="chat-header">
             <button @click="toggleSidebar" class="btn-icon">
-              <SidebarToggleIcon :rotated="!sidebarVisible" />
+              <MenuSidebarToggleIcon :rotated="!sidebarVisible" />
             </button>
             <h4>{{ sessionStore.currentSession?.title || '新会话' }}</h4>
           </div>
@@ -43,7 +43,7 @@ import MenuSidebar from '@/components/layout/MenuSidebar.vue'
 import MessageBubble from '@/components/chat/message/MessageBubble.vue'
 import ToolCallSidebar from '@/components/layout/ToolCallSidebar.vue'
 import ChatInput from '@/components/chat/input/ChatInput.vue'
-import { SidebarToggleIcon } from '@/components/icons'
+import { MenuSidebarToggleIcon } from '@/components/icons'
 
 const route = useRoute()
 const router = useRouter()
@@ -255,6 +255,12 @@ function handleStop() {
 }
 
 function showToolCallSidebar(results) {
+  // 若工具侧边栏处于打开状态，先关闭再切换到其他结果集，避免产生抖动
+  if(isToolCallSidebarVisible.value){
+    currentToolCallResults.value = null
+    isToolCallSidebarVisible.value = false
+    return
+  }
   currentToolCallResults.value = results
   isToolCallSidebarVisible.value = true
 }

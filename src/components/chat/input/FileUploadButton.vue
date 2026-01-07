@@ -22,6 +22,11 @@
     text/markdown, .md
   " multiple>
   </div>
+
+  <div v-if="toast.show" class="toast"
+    :class="{ 'toast-success': toast.type === 'success', 'toast-error': toast.type === 'error' }">
+    {{ toast.message }}
+  </div>
 </template>
 
 <script setup>
@@ -30,18 +35,49 @@ import { FileUploadIcon } from '@/components/icons'
 
 const fileInput = ref(null)
 
+const toast = ref({
+  show: false,
+  message: '',
+  type: 'success'
+})
+
+const emit = defineEmits(['file-upload'])
+
 const triggerFileInput = () => {
   fileInput.value.click()
 }
 
-const emit = defineEmits(['file-upload'])
-
 const handleFileChange = (event) => {
-  const files = event.target.files
-  if (!files) return
+  const files = Array.from(event.target.files)
+  if (files.length === 0) return
+
+  if (files.length > 10) {
+    showToast('单次至多上传10个文件', 'error')
+    event.target.value = ''
+    return
+  }
+
+  const maxSize = 100 * 1024 * 1024
+  const oversizedFiles = files.filter(file => file.size > maxSize)
+  if (oversizedFiles.length > 0) {
+    showToast(`每个文件不超过100MB`, 'error')
+    event.target.value = ''
+    return
+  }
 
   emit('file-upload', files)
   event.target.value = ''
+}
+
+function showToast(message, type = 'success') {
+  toast.value = {
+    show: true,
+    message,
+    type
+  }
+  setTimeout(() => {
+    toast.value.show = false
+  }, 1500)
 }
 </script>
 
@@ -110,5 +146,40 @@ const handleFileChange = (event) => {
   border-width: 5px;
   border-style: solid;
   border-color: var(--color-tooltip-bg, #333) transparent transparent transparent;
+}
+
+.toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 12px 20px;
+  border-radius: 6px;
+  color: white;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  animation: slideIn 0.3s ease-out;
+  transition: all 0.3s ease;
+}
+
+.toast-success {
+  background-color: #10b981;
+}
+
+.toast-error {
+  background-color: #ef4444;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 </style>

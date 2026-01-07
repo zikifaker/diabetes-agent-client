@@ -19,7 +19,9 @@
             <UploadIcon />
             {{ uploading ? '上传中...' : '上传文件' }}
           </button>
-          <div class="tooltip">支持单次上传不超过 10 个文件<br />单个文件不超过 100MB</div>
+          <div class="tooltip">
+            支持 PDF / text / Markdown <br />单次上传至多 10 个文件<br />每个不超过 100MB
+          </div>
         </div>
 
         <input ref="fileInput" type="file" @change="handleFileUpload" accept=".pdf,.md,.txt" style="display: none"
@@ -182,7 +184,7 @@ async function handleFileUpload(event) {
   const maxSize = 100 * 1024 * 1024
   const oversizedFiles = files.filter(file => file.size > maxSize)
   if (oversizedFiles.length > 0) {
-    showToast(`单个文件不能超过100MB`, 'error')
+    showToast(`每个文件不超过100MB`, 'error')
     event.target.value = ''
     return
   }
