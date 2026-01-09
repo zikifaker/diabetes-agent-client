@@ -12,3 +12,13 @@ defineProps({
   }
 })
 </script>
+
+<style scoped>
+.toggle-icon {
+  transition: transform 0.3s ease;
+}
+
+.toggle-icon.expanded {
+  transform: rotate(180deg);
+}
+</style>

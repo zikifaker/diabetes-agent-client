@@ -51,7 +51,7 @@
               {{ getThinkingStatus() }}
             </span>
           </div>
-          <ThinkingToggleIcon />
+          <ThinkingToggleIcon :expanded="showThinking" />
         </div>
         <transition name="slide-fade">
           <div v-if="showThinking" class="thinking-content">
@@ -68,11 +68,9 @@
         </button>
       </div>
 
-      <transition name="fade-in">
-        <div v-if="message.content" class="message-content-wrapper">
-          <div class="message-text markdown-body" v-html="renderMarkdown(message.content)"></div>
-        </div>
-      </transition>
+      <div v-if="message.content" class="message-content-wrapper">
+        <div class="message-text markdown-body" v-html="renderMarkdown(message.content)"></div>
+      </div>
     </div>
   </div>
 </template>
@@ -407,28 +405,12 @@ function showToolCalls() {
 .message-content-wrapper {
   position: relative;
   padding: 8px 0;
-  animation: fadeIn 0.3s ease-out;
 }
 
 .human .message-content-wrapper {
   display: flex;
   justify-content: flex-end;
   width: 100%;
-}
-
-@keyframes bounce {
-
-  0%,
-  80%,
-  100% {
-    transform: translateY(0);
-    opacity: 0.5;
-  }
-
-  40% {
-    transform: translateY(-4px);
-    opacity: 1;
-  }
 }
 
 @keyframes shine {
@@ -445,18 +427,6 @@ function showToolCalls() {
   }
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(5px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 .slide-fade-enter-active {
   transition: all 0.6s ease-out;
 }
@@ -469,10 +439,6 @@ function showToolCalls() {
 .slide-fade-leave-to {
   transform: translateY(-5px);
   opacity: 0;
-}
-
-.fade-in-enter-active {
-  animation: fadeIn 0.4s ease-out;
 }
 
 .tool-call-trigger {
