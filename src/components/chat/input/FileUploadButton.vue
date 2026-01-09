@@ -1,11 +1,14 @@
 <template>
   <div class="file-upload-container">
     <div class="tooltip-container">
-      <button @click="triggerFileInput" class="icon-button">
-        <FileUploadIcon />
+      <button @click="triggerFileInput" class="icon-button" :disabled="disabled" :class="{ 'disabled': disabled }">
+        <FileUploadIcon :class="{ 'disabled-icon': disabled }" />
       </button>
-      <div class="tooltip">
+      <div class="tooltip" v-if="!disabled">
         支持 PNG / JPG / JEPG / GIF / WEBP / Word / PDF / Excel / txt / Markdown<br />单次上传至多 10 个文件，每个不超过 100MB
+      </div>
+      <div class="tooltip" v-else>
+        当前页面不支持上传文件
       </div>
     </div>
     <input type="file" ref="fileInput" @change="handleFileChange" style="display: none" accept="
@@ -32,6 +35,13 @@
 <script setup>
 import { ref } from 'vue'
 import { FileUploadIcon } from '@/components/icons'
+
+const props = defineProps({
+  disabled: {
+    type: Boolean,
+    default: false
+  }
+})
 
 const fileInput = ref(null)
 
@@ -101,6 +111,19 @@ function showToast(message, type = 'success') {
 
 .icon-button:hover {
   color: var(--color-primary, #409eff);
+}
+
+.icon-button:hover:not(:disabled) {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.icon-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.disabled-icon {
+  opacity: 0.6;
 }
 
 .tooltip-container {

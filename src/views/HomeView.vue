@@ -14,7 +14,7 @@
       </div>
 
       <div class="input-area-wrapper">
-        <ChatInput @send="onSend" @stop="chatStore.handleStop" :loading="isLoading" />
+        <ChatInput @send="onSend" @stop="chatStore.handleStop" :loading="isLoading" :disableFileUploadButton="true" />
       </div>
     </main>
   </div>
@@ -46,7 +46,7 @@ async function onSend(data) {
     const session = await sessionStore.createSession()
     sessionStore.setCurrentSession(session)
     sessionStore.messages = []
-    
+
     initialMessage.value = data
     router.push(`/chat/${session.id}`)
   } catch (error) {

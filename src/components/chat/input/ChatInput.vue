@@ -26,7 +26,7 @@
           </div>
 
           <div class="right-controls">
-            <FileUploadButton @file-upload="handleFileUpload" />
+            <FileUploadButton @file-upload="handleFileUpload" :disabled="disableFileUploadButton"/>
 
             <VoiceInputButton v-model:isListening="isListening" @result="handleVoiceResult" class="voice-input-btn" />
 
@@ -68,6 +68,10 @@ const props = defineProps({
   placeholder: {
     type: String,
     default: '请输入内容...'
+  },
+  disableFileUploadButton: {
+    type: Boolean,
+    default: false
   }
 })
 
