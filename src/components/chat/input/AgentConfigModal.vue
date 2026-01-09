@@ -9,9 +9,9 @@
         <div class="config-group config-row">
           <div class="iteration-controls">
             <label for="maxIterations">最大迭代次数:</label>
-            <input id="maxIterations" v-model.number="localMaxIterations" type="number" min="5" max="10"
-              class="iteration-input" @blur="handleMaxIterationsBlur">
-            <span v-if="showIterationError" class="iteration-error">需在5-10之间</span>
+            <input id="maxIterations" v-model.number="localConfig.maxIterations" type="number" min="5" max="10"
+              class="iteration-input" @blur="handleMaxIterationsValidation">
+            <span v-if="showIterationError" class="iteration-error">该参数需要在5-10之间</span>
           </div>
         </div>
 
@@ -58,46 +58,35 @@ const props = defineProps({
 const emit = defineEmits(['update:config', 'close'])
 
 const localConfig = ref({ ...props.config })
-const localMaxIterations = ref(props.config.maxIterations)
 const showIterationError = ref(false)
 const errorTimeout = ref(null)
 
-watch(() => props.config, (newVal) => {
-  localConfig.value = { ...newVal }
-  localMaxIterations.value = newVal.maxIterations
-}, { deep: true, immediate: true })
-
-function handleMaxIterationsBlur() {
-  const value = parseInt(localMaxIterations.value)
-
-  if (isNaN(value) || value < 5 || value > 10) {
+function handleMaxIterationsValidation() {
+  let val = parseInt(localConfig.value.maxIterations)
+  if (isNaN(val) || val < 5 || val > 10) {
     showIterationError.value = true
+    localConfig.value.maxIterations = val < 5 ? 5 : 10
 
-    if (errorTimeout.value) {
-      clearTimeout(errorTimeout.value)
-    }
-
-    const correctedValue = value < 5 ? 5 : 10
-    localMaxIterations.value = correctedValue
-    localConfig.value.maxIterations = correctedValue
-
+    clearTimeout(errorTimeout.value)
     errorTimeout.value = setTimeout(() => {
       showIterationError.value = false
     }, 3000)
-  } else {
-    showIterationError.value = false
-    localConfig.value.maxIterations = value
   }
 }
 
 function handleSave() {
+  handleMaxIterationsValidation()
   emit('update:config', { ...localConfig.value })
   emit('close')
 }
 
 onUnmounted(() => {
-  if (errorTimeout.value) {
-    clearTimeout(errorTimeout.value)
+  clearTimeout(errorTimeout.value)
+})
+
+watch(() => props.show, (isShowing) => {
+  if (isShowing) {
+    localConfig.value = props.config
   }
 })
 </script>
