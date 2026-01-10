@@ -105,6 +105,7 @@ export const useChat = defineStore('chat', () => {
       }
       throw error
     } finally {
+      streamingMessage.value.thinking_complete = true
       isLoading.value = false
       abortController.value = null
     }
@@ -122,7 +123,9 @@ export const useChat = defineStore('chat', () => {
         try {
           const result = JSON.parse(event.content)
           streamingMessage.value.tool_call_results.push(result)
-        } catch (e) { console.error(e) }
+        } catch (error) {
+          console.error(error)
+        }
         break
 
       case 'final_answer':

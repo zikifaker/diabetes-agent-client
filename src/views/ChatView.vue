@@ -17,7 +17,7 @@
               <MessageBubble v-for="message in sessionStore.messages" :key="message.id" :message="message"
                 @show-tool-calls="showToolCallSidebar" />
 
-              <MessageBubble v-if="streamingMessage" :message="streamingMessage" :streaming="true"
+              <MessageBubble v-if="streamingMessage" :message="streamingMessage" :streaming="isLoading"
                 @show-tool-calls="showToolCallSidebar" />
             </div>
           </div>
