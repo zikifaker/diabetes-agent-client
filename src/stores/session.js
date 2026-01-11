@@ -28,7 +28,13 @@ export const useSessionStore = defineStore('session', () => {
   }
 
   async function deleteSession(id) {
-    await api.delete(`/session/${id}`)
+    const hasUploadedFiles = messages.value.some(msg =>
+      Array.isArray(msg.uploaded_files) && msg.uploaded_files.length > 0
+    )
+    await api.delete(`/session/${id}`, {
+      params: { 'has_uploaded_files': hasUploadedFiles }
+    })
+
     sessions.value = sessions.value.filter(s => s.id !== id)
     if (currentSession.value?.id === id) {
       currentSession.value = null

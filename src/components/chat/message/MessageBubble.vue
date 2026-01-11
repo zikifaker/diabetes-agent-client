@@ -9,7 +9,6 @@
 
     <div class="message-content">
       <div class="message-header">
-        <span class="message-sender">{{ message.role === 'human' ? '用户' : 'AI Agent' }}</span>
         <span class="message-time">{{ formatTime(message.created_at) }}</span>
       </div>
 
@@ -221,12 +220,6 @@ function showToolCalls() {
   align-items: center;
   gap: 12px;
   margin-bottom: 6px;
-}
-
-.message-sender {
-  font-weight: 600;
-  font-size: 14px;
-  color: var(--text-primary);
 }
 
 .message-time {

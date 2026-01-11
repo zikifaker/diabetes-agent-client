@@ -98,6 +98,7 @@ export const useChat = defineStore('chat', () => {
     } catch (error) {
       if (error.name === 'AbortError') {
         if (streamingMessage.value) {
+          streamingMessage.value.thinking_complete = true
           streamingMessage.value.content += '\n\n该消息被停止'
           sessionStore.addMessage(streamingMessage.value)
           streamingMessage.value = null
@@ -105,7 +106,6 @@ export const useChat = defineStore('chat', () => {
       }
       throw error
     } finally {
-      streamingMessage.value.thinking_complete = true
       isLoading.value = false
       abortController.value = null
     }
