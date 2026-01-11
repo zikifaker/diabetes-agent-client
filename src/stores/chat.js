@@ -32,7 +32,7 @@ export const useChat = defineStore('chat', () => {
       created_at: new Date().toISOString(),
       role: 'ai',
       thinking_complete: false,
-      immediate_steps: '',
+      intermediate_steps: '',
       tool_call_results: [],
       content: '',
       uploaded_files: data.uploaded_files
@@ -115,8 +115,8 @@ export const useChat = defineStore('chat', () => {
     if (!streamingMessage.value) return
 
     switch (event.type) {
-      case 'immediate_steps':
-        streamingMessage.value.immediate_steps += event.content
+      case 'intermediate_steps':
+        streamingMessage.value.intermediate_steps += event.content
         break
 
       case 'tool_call_results':
@@ -129,14 +129,14 @@ export const useChat = defineStore('chat', () => {
         break
 
       case 'final_answer':
-        if (!streamingMessage.value.thinking_complete && streamingMessage.value.immediate_steps) {
+        if (!streamingMessage.value.thinking_complete && streamingMessage.value.intermediate_steps) {
           streamingMessage.value.thinking_complete = true
         }
         streamingMessage.value.content += event.content
         break
 
       case 'done':
-        if (!streamingMessage.value.thinking_complete && streamingMessage.value.immediate_steps) {
+        if (!streamingMessage.value.thinking_complete && streamingMessage.value.intermediate_steps) {
           streamingMessage.value.thinking_complete = true
         }
         sessionStore.addMessage(streamingMessage.value)

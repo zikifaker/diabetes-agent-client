@@ -33,7 +33,7 @@
         </div>
       </div>
 
-      <div v-if="message.role === 'ai' && message.immediate_steps" class="thinking-steps">
+      <div v-if="message.role === 'ai' && message.intermediate_steps" class="thinking-steps">
         <div class="thinking-header" @click="toggleThinking">
           <div class="thinking-title">
             <div class="thinking-icon">
@@ -54,7 +54,7 @@
         </div>
         <transition name="slide-fade">
           <div v-if="showThinking" class="thinking-content">
-            <div class="thinking-text">{{ message.immediate_steps }}</div>
+            <div class="thinking-text">{{ message.intermediate_steps }}</div>
           </div>
         </transition>
       </div>

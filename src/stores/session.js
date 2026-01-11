@@ -50,7 +50,7 @@ export const useSessionStore = defineStore('session', () => {
       created_at: msg.created_at,
       role: msg.role,
       thinking_complete: true,
-      immediate_steps: msg.immediate_steps,
+      intermediate_steps: msg.intermediate_steps,
       tool_call_results: msg.tool_call_results,
       content: msg.content,
       uploaded_files: msg.uploaded_files
