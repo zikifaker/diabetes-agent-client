@@ -775,11 +775,15 @@ function handleGlobalClick() {
 }
 
 .toast-success {
-  background-color: #10b981;
+  background-color: rgba(236, 253, 245, 0.9);
+  border: 1px solid #10b981;
+  color: #065f46;
 }
 
 .toast-error {
-  background-color: #ef4444;
+  background-color: rgba(254, 242, 242, 0.9);
+  border: 1px solid #ef4444;
+  color: #991b1b;
 }
 
 @keyframes slideIn {

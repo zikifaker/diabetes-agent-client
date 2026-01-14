@@ -26,8 +26,7 @@
   " multiple>
   </div>
 
-  <div v-if="toast.show" class="toast"
-    :class="{ 'toast-success': toast.type === 'success', 'toast-error': toast.type === 'error' }">
+  <div v-if="toast.show" class="toast" :class="{ 'toast-error': toast.type === 'error' }">
     {{ toast.message }}
   </div>
 </template>
@@ -79,7 +78,7 @@ const handleFileChange = (event) => {
   event.target.value = ''
 }
 
-function showToast(message, type = 'success') {
+function showToast(message, type) {
   toast.value = {
     show: true,
     message,
@@ -186,12 +185,10 @@ function showToast(message, type = 'success') {
   transition: all 0.3s ease;
 }
 
-.toast-success {
-  background-color: #10b981;
-}
-
 .toast-error {
-  background-color: #ef4444;
+  background-color: rgba(254, 242, 242, 0.9);
+  border: 1px solid #ef4444;
+  color: #991b1b;
 }
 
 @keyframes slideIn {
