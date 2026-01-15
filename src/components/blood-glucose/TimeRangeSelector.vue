@@ -10,12 +10,12 @@
 
       <transition name="slide-fade">
         <div v-if="rangeType === 'custom'" class="custom-panel">
-          <div class="divider"></div>
           <div class="date-input-group">
             <input type="date" :value="formatLocalDate(customRange.start)"
               @change="e => updateRange('start', e.target.value)" />
             <span class="separator">至</span>
-            <input type="date" :value="formatLocalDate(customRange.end)" @change="e => updateRange('end', e.target.value)" />
+            <input type="date" :value="formatLocalDate(customRange.end)"
+              @change="e => updateRange('end', e.target.value)" />
           </div>
         </div>
       </transition>
@@ -24,12 +24,17 @@
 </template>
 
 <script setup>
+import { formatLocalDate } from '@/utils/time'
+
 const props = defineProps({
   rangeType: {
     type: String,
     default: '1d'
   },
-  customRange: Object
+  customRange: {
+    type: Object,
+    required: true
+  }
 })
 
 const emit = defineEmits(['update:rangeType', 'update:customRange'])
@@ -40,15 +45,6 @@ const options = [
   { label: '近30天', value: '30d' },
   { label: '自定义', value: 'custom' }
 ]
-
-const formatLocalDate = (date) => {
-  if (!date) return ''
-  const d = new Date(date)
-  const year = d.getFullYear()
-  const month = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
-}
 
 const handleTypeChange = (value) => {
   emit('update:rangeType', value)
@@ -69,15 +65,11 @@ const updateRange = (type, value) => {
 </script>
 
 <style scoped>
-.selector-container {
-  margin-bottom: 24px;
-}
-
 .selector-wrapper {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
   gap: 16px;
+  margin-bottom: 10px;
 }
 
 .range-selector {
@@ -101,8 +93,8 @@ const updateRange = (type, value) => {
 }
 
 .range-selector button.active {
-  background: white;
-  color: #3182ce;
+  background: var(--primary-color);
+  color: var(--white);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
@@ -110,12 +102,6 @@ const updateRange = (type, value) => {
   display: flex;
   align-items: center;
   gap: 16px;
-}
-
-.divider {
-  width: 1px;
-  height: 20px;
-  background: #e2e8f0;
 }
 
 .date-input-group {

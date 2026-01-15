@@ -72,21 +72,20 @@ const statusOptions = [
   { label: '随机', value: 'random' }
 ]
 
+const handleBloodGlucoseValidation = () => {
+  const value = form.value.value
+  return !isNaN(value) && value >= 0 && value <= 100
+}
+
 const close = () => emit('close')
 
 const handleSubmit = () => {
+  if (!handleBloodGlucoseValidation()) return
   emit('save', {
     ...form.value,
     measuredAt: new Date(form.value.measuredAt).toISOString()
   })
   close()
-}
-
-const handleBloodGlucoseValidation = (event) => {
-  const value = event.target.value
-  if (isNaN(value) || value < 0 || value > 100) {
-    event.target.value = value < 0 ? 0 : 100
-  }
 }
 </script>
 

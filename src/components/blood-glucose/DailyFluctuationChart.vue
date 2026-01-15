@@ -54,8 +54,8 @@ const options = {
   responsive: true,
   maintainAspectRatio: false,
   plugins: {
-    legend: { 
-      display: false 
+    legend: {
+      display: false
     },
     tooltip: {
       backgroundColor: 'rgba(255, 255, 255, 0.95)',
@@ -74,26 +74,26 @@ const options = {
   scales: {
     y: {
       beginAtZero: false,
-      grid: { 
-        color: '#f1f5f9', 
-        drawBorder: false 
-      },
-      ticks: { 
-        color: '#94a3b8', 
-        font: { 
-          size: 12 
-        } 
-      },
-    },
-    x: {
-      grid: { 
-        display: false, 
-        drawBorder: false 
+      grid: {
+        color: '#f1f5f9',
+        drawBorder: false
       },
       ticks: {
         color: '#94a3b8',
-        font: { 
-          size: 12 
+        font: {
+          size: 12
+        }
+      },
+    },
+    x: {
+      grid: {
+        display: false,
+        drawBorder: false
+      },
+      ticks: {
+        color: '#94a3b8',
+        font: {
+          size: 12
         },
         maxRotation: 0,
         autoSkip: true,
@@ -110,7 +110,7 @@ const options = {
         if (!chartArea) return null
 
         const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom)
-        gradient.addColorStop(0, 'rgba(229, 62, 62, 0.1)')
+        gradient.addColorStop(0.8, 'rgba(229, 62, 62, 0.1)')
         gradient.addColorStop(1, 'rgba(229, 62, 62, 0)')
 
         return gradient;

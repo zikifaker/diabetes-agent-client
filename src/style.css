@@ -21,7 +21,7 @@ body {
   font-family: 'Google Sans', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
   color: var(--text-primary);
   background: var(--white);
-  overflow: hidden;
+  overflow: auto;
 }
 
 input,

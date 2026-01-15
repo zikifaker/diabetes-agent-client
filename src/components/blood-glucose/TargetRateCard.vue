@@ -1,18 +1,27 @@
 <template>
-  <div class="target-card compact">
-    <div class="breakdown">
-      <div class="item normal">
-        <span>正常</span>
-        <strong>{{ normalRate }}%</strong>
-      </div>
-      <div class="item high">
-        <span>偏高</span>
-        <strong>{{ highRate }}%</strong>
-      </div>
-      <div class="item low">
-        <span>偏低</span>
-        <strong>{{ lowRate }}%</strong>
-      </div>
+  <div class="metrics-container">
+    <div class="metric-card total">
+      <div class="metric-value">{{ total }}</div>
+      <div class="metric-label">总记录数</div>
+      <div class="metric-icon">📊</div>
+    </div>
+
+    <div class="metric-card normal">
+      <div class="metric-value">{{ normalRate }}<span class="percent">%</span></div>
+      <div class="metric-label">正常</div>
+      <div class="trend" v-if="normalRate > 0">↑ {{ normalCount }}</div>
+    </div>
+
+    <div class="metric-card high">
+      <div class="metric-value">{{ highRate }}<span class="percent">%</span></div>
+      <div class="metric-label">偏高</div>
+      <div class="trend" v-if="highRate > 0">↑ {{ highCount }}</div>
+    </div>
+
+    <div class="metric-card low">
+      <div class="metric-value">{{ lowRate }}<span class="percent">%</span></div>
+      <div class="metric-label">偏低</div>
+      <div class="trend" v-if="lowRate > 0">↑ {{ lowCount }}</div>
     </div>
   </div>
 </template>
@@ -35,64 +44,141 @@ const props = defineProps({
   }
 })
 
-const normalCount = computed(() =>
-  props.records.filter(r => r.value >= props.low && r.value <= props.high).length
-)
-
-const highCount = computed(() =>
-  props.records.filter(r => r.value > props.high).length
-)
-
-const lowCount = computed(() =>
-  props.records.filter(r => r.value < props.low).length
-)
-
 const total = computed(() => props.records.length || 1)
+const highCount = computed(() => props.records.filter(r => r.value > props.high).length)
+const lowCount = computed(() => props.records.filter(r => r.value < props.low).length)
+const normalCount = computed(() => total.value - highCount.value - lowCount.value)
 
-const normalRate = computed(() =>
-  Math.round(normalCount.value / total.value * 100)
-)
-const highRate = computed(() =>
-  Math.round(highCount.value / total.value * 100)
-)
-const lowRate = computed(() =>
-  Math.round(lowCount.value / total.value * 100)
-)
+const normalRate = computed(() => Math.round(normalCount.value / total.value * 100))
+const highRate = computed(() => Math.round(highCount.value / total.value * 100))
+const lowRate = computed(() => Math.round(lowCount.value / total.value * 100))
 </script>
 
 <style scoped>
-.target-card.compact {
-  padding: 20px;
-}
-
-.rate {
-  font-size: 30px;
-}
-
-.breakdown {
-  margin-top: 16px;
+.metrics-container {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
 }
 
-.breakdown .item {
-  background: #f7fafc;
-  border-radius: 10px;
-  padding: 10px;
-  font-size: 13px;
-  text-align: center;
+.metric-card {
+  position: relative;
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  overflow: hidden;
 }
 
-.item.normal {
-  color: #2f855a;
+.metric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
 }
 
-.item.high {
-  color: #c05621;
+.metric-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
 }
 
-.item.low {
-  color: #c53030;
+.metric-card.total {
+  background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+}
+
+.metric-card.total::before {
+  background: #64748b;
+}
+
+.metric-card.normal {
+  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+}
+
+.metric-card.normal::before {
+  background: #22c55e;
+}
+
+.metric-card.high {
+  background: linear-gradient(135deg, #fffbeb, #fef3c7);
+}
+
+.metric-card.high::before {
+  background: #f59e0b;
+}
+
+.metric-card.low {
+  background: linear-gradient(135deg, #fef2f2, #fee2e2);
+}
+
+.metric-card.low::before {
+  background: #ef4444;
+}
+
+.metric-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: flex-start;
+}
+
+.metric-card .percent {
+  font-size: 16px;
+  font-weight: 500;
+  opacity: 0.8;
+  margin-left: 2px;
+}
+
+.metric-label {
+  font-size: 14px;
+  color: #64748b;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.trend {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.metric-card.normal .trend {
+  color: #16a34a;
+}
+
+.metric-card.high .trend {
+  color: #d97706;
+}
+
+.metric-card.low .trend {
+  color: #dc2626;
+}
+
+.metric-icon {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  font-size: 24px;
+  opacity: 0.2;
+}
+
+@media (max-width: 768px) {
+  .metrics-container {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .metrics-container {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

@@ -3,7 +3,7 @@
     <header class="analysis-header">
       <div>
         <h1>血糖分析</h1>
-        <p class="date-range">{{ displayDateRange }}</p>
+        <p class="date-range">数据范围：{{ displayDateRange }}</p>
       </div>
 
       <div class="header-actions">
@@ -35,8 +35,11 @@
       <section class="chart-card">
         <div class="card-header">
           <h3 class="card-title">单日血糖波动</h3>
-          <input type="date" v-model="selectedDate" class="date-picker" :min="formatLocalDate(customDateRange.start)"
-            :max="formatLocalDate(customDateRange.end)" />
+          <div class="date-picker-wrapper">
+            <CalendarIcon class="calendar-icon" />
+            <input type="date" v-model="selectedDate" class="date-picker" :min="formatLocalDate(customDateRange.start)"
+              :max="formatLocalDate(customDateRange.end)" />
+          </div>
         </div>
         <div class="chart-container">
           <DailyFluctuationChart :records="filteredRecords" :date="selectedDate" />
@@ -60,7 +63,8 @@ import AddRecordForm from '@/components/blood-glucose/AddRecordForm.vue'
 import TargetRateCard from '@/components/blood-glucose/TargetRateCard.vue'
 import DailyAverageChart from '@/components/blood-glucose/DailyAverageChart.vue'
 import DailyFluctuationChart from '@/components/blood-glucose/DailyFluctuationChart.vue'
-import { NewRecordIcon, ViewReportIcon } from '@/components/icons/blood-glucose'
+import { NewRecordIcon, ViewReportIcon, CalendarIcon } from '@/components/icons/blood-glucose'
+import { formatLocalDate } from '@/utils/time'
 
 const bloodGlucoseStore = useBloodGlucoseStore()
 const { records } = storeToRefs(bloodGlucoseStore)
@@ -127,14 +131,6 @@ function showToast(message, type = 'success') {
   setTimeout(() => {
     toast.value.show = false
   }, 1500)
-}
-
-const formatLocalDate = (date) => {
-  const d = new Date(date)
-  const year = d.getFullYear()
-  const month = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
 }
 
 const formatDisplayDate = (date) => {
@@ -279,7 +275,6 @@ onMounted(async () => {
 }
 
 .chart-card:hover {
-  transform: translateY(-2px);
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
@@ -302,20 +297,65 @@ onMounted(async () => {
   margin: 0;
 }
 
+.date-picker-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.calendar-icon {
+  position: absolute;
+  left: 12px;
+  width: 16px;
+  height: 16px;
+  color: #94a3b8;
+  pointer-events: none;
+  z-index: 2;
+}
+
 .date-picker {
-  padding: 6px 12px;
+  position: relative;
+  padding: 8px 12px 8px 36px;
   border: 1px solid #e2e8f0;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 14px;
   color: #4a5568;
   background-color: #f8fafc;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  min-width: 140px;
+}
+
+.date-picker::-webkit-calendar-picker-indicator {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.date-picker::-moz-calendar-picker-indicator {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
 }
 
 .date-picker:focus {
   outline: none;
   border-color: #4299e1;
   box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+  background-color: white;
+}
+
+.date-picker:hover {
+  border-color: #cbd5e0;
+  background-color: white;
 }
 
 .toast {
