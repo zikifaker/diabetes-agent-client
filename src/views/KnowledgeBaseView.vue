@@ -30,7 +30,7 @@
     </div>
 
     <div class="content">
-      <div v-if="loading && knowledgeFiles.length === 0" class="loading-state">
+      <div v-if="loading" class="loading-state">
         <div class="loading-spinner"></div>
         <p>加载中...</p>
       </div>
@@ -98,7 +98,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useKnowledgeBaseStore } from '@/stores/knowledge_base'
 import { storeToRefs } from 'pinia'
 import { SearchIcon, CloseIcon, UploadIcon, EmptyStateIcon, MenuIcon } from '@/components/icons'
@@ -300,8 +300,14 @@ async function confirmDelete() {
   }
 }
 
+function handleGlobalClick() {
+  activeFileMenu.value = null
+  if (searchActive.value && !searchQuery.value) {
+    searchActive.value = false
+  }
+}
+
 onMounted(async () => {
-  // 监听全局点击事件，用于关闭文件菜单
   document.addEventListener('click', handleGlobalClick)
 
   try {
@@ -311,12 +317,9 @@ onMounted(async () => {
   }
 })
 
-function handleGlobalClick() {
-  activeFileMenu.value = null
-  if (searchActive.value && !searchQuery.value) {
-    searchActive.value = false
-  }
-}
+onUnmounted(() => {
+  document.removeEventListener('click', handleGlobalClick)
+})
 </script>
 
 <style scoped>

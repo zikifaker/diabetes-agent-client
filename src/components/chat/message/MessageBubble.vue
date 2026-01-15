@@ -114,7 +114,7 @@ const isFileParsing = computed(() => {
 })
 
 const isThinking = computed(() => {
-  return props.streaming && !props.message.thinking_complete;
+  return props.streaming && !props.message.thinking_complete
 })
 
 function formatTime(timestamp) {

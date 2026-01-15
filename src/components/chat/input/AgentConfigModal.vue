@@ -62,20 +62,22 @@ const showIterationError = ref(false)
 const errorTimeout = ref(null)
 
 function handleMaxIterationsValidation() {
-  let val = parseInt(localConfig.value.maxIterations)
-  if (isNaN(val) || val < 5 || val > 10) {
-    showIterationError.value = true
-    localConfig.value.maxIterations = val < 5 ? 5 : 10
+  const val = parseInt(localConfig.value.maxIterations, 10)
+  const isValid = !isNaN(val) && val >= 5 && val <= 10
 
+  showIterationError.value = !isValid
+  if (!isValid) {
     clearTimeout(errorTimeout.value)
     errorTimeout.value = setTimeout(() => {
       showIterationError.value = false
     }, 3000)
   }
+
+  return isValid
 }
 
 function handleSave() {
-  handleMaxIterationsValidation()
+  if (!handleMaxIterationsValidation()) return
   emit('update:config', { ...localConfig.value })
   emit('close')
 }

@@ -112,11 +112,9 @@ const authStore = useAuthStore()
 const sessionStore = useSessionStore()
 
 const showUserMenu = ref(false)
-
+const activeMenu = ref(null)
 const showDeleteModal = ref(false)
 const sessionToDelete = ref(null)
-
-const activeMenu = ref(null)
 const editingSessionId = ref(null)
 const editingTitle = ref('')
 const renameInput = ref(null)
@@ -176,12 +174,15 @@ async function confirmRename(session) {
   }
 
   if (editingTitle.value !== session.title) {
-    await sessionStore.updateSessionTitle(
-      session.id,
-      editingTitle.value.trim()
-    )
+    try {
+      await sessionStore.updateSessionTitle(
+        session.id,
+        editingTitle.value.trim()
+      )
+    } catch (error) {
+      console.error('Failed to update session title:', error)
+    }
   }
-
   cancelRename()
 }
 
@@ -210,13 +211,13 @@ function handleClickOutside(event) {
 }
 
 onMounted(async () => {
+  document.addEventListener('click', handleClickOutside)
+
   try {
     await sessionStore.fetchSessions()
   } catch (error) {
     console.error('Failed to fetch sessions:', error)
   }
-
-  document.addEventListener('click', handleClickOutside)
 })
 
 onUnmounted(() => {

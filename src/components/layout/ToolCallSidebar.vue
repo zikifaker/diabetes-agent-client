@@ -62,28 +62,33 @@ defineProps({
     type: Array,
     default: () => []
   }
-});
+})
 
-defineEmits(['close']);
+defineEmits(['close'])
 
-const jsonModalVisible = ref(false);
-const currentJson = ref(null);
-const currentToolName = ref('');
+const jsonModalVisible = ref(false)
+const currentJson = ref(null)
+const currentToolName = ref('')
 
 const openJsonModal = (result) => {
-  currentJson.value = parseJSON(result.result);
-  currentToolName.value = result.name;
-  jsonModalVisible.value = true;
-};
+  currentJson.value = parseJSON(result.result)
+  currentToolName.value = result.name
+  jsonModalVisible.value = true
+}
 
 const parseJSON = (value) => {
   try {
-    return typeof value === 'string' ? JSON.parse(value) : value;
-  } catch (e) {
-    console.error('Failed to parse JSON:', e);
-    return { error: 'Invalid JSON', raw: value };
+    const parsed = JSON.parse(value)
+    if (Array.isArray(parsed)) {
+      return parsed.map(item =>
+        typeof item === 'string' ? parseJSON(item) : item
+      )
+    }
+    return parsed
+  } catch {
+    return value
   }
-};
+}
 </script>
 
 <style scoped>
