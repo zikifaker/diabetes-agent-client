@@ -42,6 +42,8 @@ const props = defineProps({
   }
 })
 
+const emit = defineEmits(['file-upload'])
+
 const fileInput = ref(null)
 
 const toast = ref({
@@ -49,8 +51,6 @@ const toast = ref({
   message: '',
   type: 'success'
 })
-
-const emit = defineEmits(['file-upload'])
 
 const triggerFileInput = () => {
   fileInput.value.click()

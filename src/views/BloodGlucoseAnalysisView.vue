@@ -109,7 +109,10 @@ const handleSave = async (record) => {
   showToast('保存成功', 'success')
 
   try {
-    await bloodGlucoseStore.fetchRecords(customDateRange.value.start.toISOString(), customDateRange.value.end.toISOString())
+    await bloodGlucoseStore.fetchRecords(
+      customDateRange.value.start.toISOString(),
+      customDateRange.value.end.toISOString()
+    )
   } catch (error) {
     console.error('Failed to fetch blood glucose records:', error)
   }

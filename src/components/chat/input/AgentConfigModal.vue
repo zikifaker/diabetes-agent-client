@@ -142,23 +142,6 @@ watch(() => props.show, (isShowing) => {
   margin: 0;
 }
 
-.btn-close {
-  padding: 8px;
-  border-radius: 50%;
-  border: none;
-  background: transparent;
-  color: var(--text-secondary);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-}
-
-.btn-close:hover {
-  background: rgba(0, 0, 0, 0.04);
-}
-
 .config-content {
   padding: 20px 24px;
 }

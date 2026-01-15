@@ -197,11 +197,10 @@ function showToolCalls() {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: var(--primary-color);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
 }
 
 .message-content {

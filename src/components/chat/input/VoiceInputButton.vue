@@ -23,10 +23,6 @@ import workletURL from '@/utils/recorder_worklet.js?url'
 import { VoiceInputIcon } from '@/components/icons'
 
 const props = defineProps({
-  lang: {
-    type: String,
-    default: 'zh-CN'
-  },
   isListening: {
     type: Boolean,
     default: false
@@ -74,7 +70,7 @@ const startListening = async () => {
 
     const source = audioContext.createMediaStreamSource(stream)
     workletNode = new AudioWorkletNode(audioContext, 'recorder-processor')
-    
+
     workletNode.port.onmessage = (e) => {
       audioData.push(e.data.buffer)
     }
@@ -95,8 +91,8 @@ const startListening = async () => {
       workletNode.disconnect()
 
       const wavBlob = createWAVBlob(audioData, sampleRate)
-      await fetchVoiceRecognitionAPI(wavBlob)
-      
+      await fetchVoiceRecognitionResult(wavBlob)
+
       audioChunks = []
       audioData = []
     }
@@ -156,7 +152,7 @@ const stopListening = () => {
   emit('update:isListening', false)
 }
 
-const fetchVoiceRecognitionAPI = async (audioBlob) => {
+const fetchVoiceRecognitionResult = async (audioBlob) => {
   try {
     const formData = new FormData()
     formData.append('audio', audioBlob, 'recording.wav')

@@ -56,7 +56,7 @@
               <span class="file-extension">PDF</span>
             </div>
             <div v-else-if="file.fileType === 'md'" class="file-thumbnail md-thumbnail">
-              <span class="file-extension">MD</span>
+              <span class="file-extension">Markdown</span>
             </div>
             <div v-else class="file-thumbnail default-thumbnail">
               <span class="file-extension">{{ getFileExtension(file.fileName) }}</span>
@@ -122,18 +122,12 @@ const toast = ref({
 })
 
 async function handleSearch() {
-  if (!searchQuery.value.trim()) {
-    return
-  }
+  if (!searchQuery.value.trim()) return
 
   try {
     await knowledgeBaseStore.searchFiles(searchQuery.value)
   } catch (error) {
     console.error('Failed to search files:', error)
-
-    knowledgeFiles.value = knowledgeFiles.value.filter(file =>
-      file.fileName.includes(searchQuery.value)
-    )
   }
 }
 
@@ -307,6 +301,7 @@ async function confirmDelete() {
 }
 
 onMounted(async () => {
+  // 监听全局点击事件，用于关闭文件菜单
   document.addEventListener('click', handleGlobalClick)
 
   try {
@@ -318,7 +313,6 @@ onMounted(async () => {
 
 function handleGlobalClick() {
   activeFileMenu.value = null
-
   if (searchActive.value && !searchQuery.value) {
     searchActive.value = false
   }
@@ -379,25 +373,6 @@ function handleGlobalClick() {
   font-size: 14px;
   color: var(--text-primary);
   padding-right: 30px;
-}
-
-.clear-search {
-  position: absolute;
-  right: 40px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  color: var(--text-secondary);
-  cursor: pointer;
-  padding: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.clear-search:hover {
-  color: var(--text-primary);
 }
 
 .search-trigger {

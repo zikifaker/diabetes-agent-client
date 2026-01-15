@@ -119,8 +119,12 @@ onMounted(async () => {
 
     await chatStore.handleSend(data, sessionId)
   } else {
-    // 若从已有的聊天会话进入，先获取历史消息
-    await sessionStore.fetchMessages(sessionId)
+    // 若从已有的聊天会话进入，获取历史消息
+    try {
+      await sessionStore.fetchMessages(sessionId)
+    } catch (error) {
+      console.error('Error fetching session messages:', error)
+    }
 
     const session = sessionStore.sessions.find(s => s.id == sessionId)
     if (session) {
@@ -151,7 +155,7 @@ onMounted(() => {
 
 watch(() => route.params.id, async (newId) => {
   try {
-    // 若当前不在发送消息且不是从首页跳转，获取历史消息
+    // 若无内容正在生成且不是从首页跳转，获取历史消息
     if (newId && !isLoading.value && !initialMessage.value) {
       await sessionStore.fetchMessages(newId)
 
@@ -212,7 +216,7 @@ watch(() => route.params.id, async (newId) => {
   background: var(--white);
 }
 
-.chat-header h2 {
+.chat-header h4 {
   font-size: 18px;
   font-weight: 500;
   color: var(--text-primary);

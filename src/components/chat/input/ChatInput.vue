@@ -113,7 +113,7 @@ const toolsOptions = ref([
 
 const agentConfig = ref({
   maxIterations: 5,
-  tools: ['search_diabetes_knowledge_graph']
+  tools: ['search_diabetes_knowledge_graph', 'search_user_knowledge_base']
 })
 
 function handleSend() {
