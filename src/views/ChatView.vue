@@ -84,6 +84,9 @@ async function handleNewChat() {
 }
 
 async function onSend(data) {
+  // 设置当前选择的 LLM
+  data.agentConfig.model = selectedLLM.value.id
+
   try {
     await chatStore.handleSend(data, route.params.id)
   } catch (error) {

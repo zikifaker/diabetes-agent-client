@@ -53,7 +53,8 @@ export const useChat = defineStore('chat', () => {
             max_iterations: data.agentConfig?.maxIterations,
             tools: data.agentConfig?.tools
           },
-          uploaded_files: data.uploadedFiles
+          uploaded_files: data.uploadedFiles,
+          enable_knowledge_base_retrieval: data.enableKnowledgeBaseRetrieval
         }),
         signal: abortController.value.signal,
 

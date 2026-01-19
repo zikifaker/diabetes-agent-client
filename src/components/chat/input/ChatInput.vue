@@ -16,6 +16,15 @@
         <div class="input-controls">
           <div class="left-controls">
             <div class="tooltip-container">
+              <button @click="enableKnowledgeBaseRetrieval = !enableKnowledgeBaseRetrieval" class="btn-knowledge-base"
+                :class="{ 'active': enableKnowledgeBaseRetrieval }" aria-label="知识库检索">
+                <KnowledgeBaseRetrievalIcon />
+                <span class="tooltip">
+                  {{ enableKnowledgeBaseRetrieval ? '关闭知识库检索' : '开启知识库检索' }}
+                </span>
+              </button>
+            </div>
+            <div class="tooltip-container">
               <button @click="showConfig = true" class="btn-config" aria-label="智能体配置">
                 <AgentConfigIcon />
                 <span class="tooltip">智能体配置</span>
@@ -55,7 +64,7 @@ import AgentConfigModal from '@/components/chat/input/AgentConfigModal.vue'
 import VoiceInputButton from '@/components/chat/input/VoiceInputButton.vue'
 import FileUploadButton from '@/components/chat/input/FileUploadButton.vue'
 import FileUploadPreview from '@/components/chat/input/FileUploadPreview.vue'
-import { AgentConfigIcon, SendIcon, StopIcon } from '@/components/icons'
+import { AgentConfigIcon, SendIcon, StopIcon, KnowledgeBaseRetrievalIcon } from '@/components/icons'
 import { getUploadPolicyToken, uploadToOSS, NAMESPACE } from '@/utils/oss.js'
 
 const props = defineProps({
@@ -82,21 +91,18 @@ const showConfig = ref(false)
 const textareaRef = ref(null)
 const isListening = ref(false)
 const uploadedFiles = ref([])
+const enableKnowledgeBaseRetrieval = ref(false)
 
 const toolsOptions = ref([
   {
     label: '糖尿病知识图谱',
     value: 'search_diabetes_knowledge_graph',
-  },
-  {
-    label: '个人知识库',
-    value: 'search_user_knowledge_base',
   }
 ])
 
 const agentConfig = ref({
   maxIterations: 5,
-  tools: ['search_diabetes_knowledge_graph', 'search_user_knowledge_base']
+  tools: ['search_diabetes_knowledge_graph']
 })
 
 function handleSend() {
@@ -105,10 +111,8 @@ function handleSend() {
   emit('send', {
     message: message.value,
     uploadedFiles: uploadedFiles.value.map(f => f.file.name),
-    agentConfig: {
-      ...agentConfig.value,
-      model: selectedLLM.value.id
-    }
+    enableKnowledgeBaseRetrieval: enableKnowledgeBaseRetrieval.value,
+    agentConfig: agentConfig.value
   })
 
   message.value = ''
@@ -288,11 +292,34 @@ onMounted(() => {
   display: inline-block;
 }
 
+.btn-knowledge-base {
+  position: relative;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.4s ease;
+
+  &:hover:not(:disabled) {
+    background-color: var(--color-hover-bg);
+    transform: translateY(-1px);
+  }
+}
+
+.btn-knowledge-base.active {
+  color: var(--primary-color);
+}
+
 .btn-config {
   position: relative;
   background: none;
   border: none;
-  color: var(--color-text);
+  color: var(--text-primary);
   cursor: pointer;
   padding: 8px;
   border-radius: 4px;
@@ -392,6 +419,7 @@ onMounted(() => {
   cursor: not-allowed;
 }
 
+.btn-knowledge-base:hover .tooltip,
 .btn-config:hover .tooltip,
 .btn-send:hover .tooltip,
 .btn-stop:hover .tooltip {
