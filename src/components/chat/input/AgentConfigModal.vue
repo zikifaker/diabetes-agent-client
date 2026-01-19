@@ -1,38 +1,43 @@
 <template>
   <div v-if="show" class="modal-overlay" @click.self="$emit('close')">
-    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="agent-config-title">
-      <div class="config-header">
-        <h3 id="agent-config-title">智能体配置</h3>
-      </div>
+    <div class="modal" role="dialog" aria-modal="true">
+      <header class="modal-header">
+        <h3>智能体配置</h3>
+      </header>
 
-      <div class="config-content">
-        <div class="config-group config-row">
-          <div class="iteration-controls">
-            <label for="maxIterations">最大迭代次数:</label>
-            <input id="maxIterations" v-model.number="localConfig.maxIterations" type="number" min="5" max="10"
-              class="iteration-input" @blur="handleMaxIterationsValidation">
-            <span v-if="showIterationError" class="iteration-error">该参数需要在5-10之间</span>
+      <section class="modal-body">
+        <div class="section">
+          <div class="field-row">
+            <label for="maxIterations">最大迭代次数</label>
+            <div class="field-control">
+              <span v-if="showIterationError" class="field-error">
+                需在 5–10 之间
+              </span>
+              <input id="maxIterations" type="number" min="5" max="10" v-model.number="localConfig.maxIterations"
+                @blur="handleMaxIterationsValidation" />
+            </div>
           </div>
         </div>
 
-        <div class="config-group">
-          <label>工具</label>
+        <div class="section">
+          <div class="section-title">MCP 工具</div>
           <div class="tools-list">
-            <div v-for="tool in toolsOptions" :key="tool.value" class="tool-item">
+            <div v-for="tool in toolsOptions" :key="tool.value" class="tool-row">
               <span class="tool-name">{{ tool.label }}</span>
+
               <label class="switch">
-                <input type="checkbox" :value="tool.value" v-model="localConfig.tools" class="sr-only">
+                <input type="checkbox" :value="tool.value" v-model="localConfig.tools" />
                 <span class="slider"></span>
               </label>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div class="config-footer">
-        <button class="btn-secondary" @click="$emit('close')">取消</button>
-        <button class="btn-primary" @click="handleSave">确认</button>
-      </div>
+      <footer class="modal-footer">
+        <button class="btn ghost" @click="$emit('close')">取消</button>
+        <button class="btn primary" @click="handleSave">保存</button>
+      </footer>
     </div>
   </div>
 </template>
@@ -97,161 +102,108 @@ watch(() => props.show, (isShowing) => {
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.35);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
   z-index: 1100;
-  backdrop-filter: blur(2px);
 }
 
-.modal-content {
+.modal {
   width: 100%;
-  max-width: 480px;
-  background: var(--white);
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-  overflow: hidden;
-  animation: modalFadeIn 0.2s ease-out;
-}
-
-@keyframes modalFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.config-header {
+  max-width: 460px;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 24px;
-  border-bottom: 1px solid var(--border-color);
+  flex-direction: column;
+  overflow: hidden;
 }
 
-.config-header h3 {
-  font-size: 18px;
-  font-weight: 500;
-  color: var(--text-primary);
+.modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-header h3 {
+  font-size: 16px;
+  font-weight: 600;
   margin: 0;
+  color: #111827;
 }
 
-.config-content {
-  padding: 20px 24px;
+.modal-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
-.config-group {
-  margin-bottom: 24px;
-}
-
-.config-group:last-child {
-  margin-bottom: 0;
-}
-
-.config-group label {
-  display: block;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text-primary);
+.section-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
   margin-bottom: 12px;
 }
 
-.config-row {
+.field-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
 }
 
-.iteration-controls {
+.field-row label {
+  font-size: 14px;
+  color: #374151;
+}
+
+.field-control {
   display: flex;
   align-items: center;
   gap: 8px;
-  width: 100%;
 }
 
-.iteration-controls label {
+.field-control input {
+  width: 72px;
+  padding: 6px 8px;
   font-size: 14px;
-  line-height: 1.5;
-  margin: 0;
-  white-space: nowrap;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
 }
 
-.iteration-input {
-  width: 80px;
-  padding: 8px 12px;
-  border: 1px solid #e2e8f0;
-  border-radius: 4px;
-  font-size: 14px;
-  height: 20px;
-  line-height: 1;
-  box-sizing: content-box;
-}
-
-.iteration-error {
-  color: #ef4444;
+.field-error {
   font-size: 12px;
-  white-space: nowrap;
+  color: #dc2626;
 }
 
 .tools-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 8px;
-  max-height: 300px;
-  overflow-y: auto;
-  padding-right: 4px;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
-.tools-list::-webkit-scrollbar {
-  width: 6px;
-}
-
-.tools-list::-webkit-scrollbar-track {
-  background: transparent;
-  border-radius: 3px;
-}
-
-.tools-list::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.2);
-  border-radius: 3px;
-}
-
-.tools-list::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(0, 0, 0, 0.3);
-}
-
-.tool-item {
+.tool-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 12px;
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  background: var(--white);
-  transition: all 0.2s ease;
+  padding: 10px 14px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.tool-row:last-child {
+  border-bottom: none;
 }
 
 .tool-name {
   font-size: 14px;
-  color: var(--text-primary);
+  color: #111827;
 }
 
 .switch {
   position: relative;
-  display: inline-block;
-  width: 40px;
-  height: 20px;
+  width: 36px;
+  height: 18px;
 }
 
 .switch input {
@@ -262,77 +214,57 @@ watch(() => props.show, (isShowing) => {
 
 .slider {
   position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  transition: .4s;
-  border-radius: 20px;
+  inset: 0;
+  background: #d1d5db;
+  border-radius: 999px;
+  transition: 0.2s;
 }
 
-.slider:before {
-  position: absolute;
+.slider::before {
   content: "";
-  height: 16px;
-  width: 16px;
+  position: absolute;
+  width: 14px;
+  height: 14px;
   left: 2px;
-  bottom: 2px;
-  background-color: white;
-  transition: .4s;
+  top: 2px;
+  background: white;
   border-radius: 50%;
+  transition: 0.2s;
 }
 
-input:checked+.slider {
-  background-color: var(--primary-color);
+.switch input:checked+.slider {
+  background: var(--primary-color);
 }
 
-input:focus+.slider {
-  box-shadow: 0 0 1px var(--primary-color);
+.switch input:checked+.slider::before {
+  transform: translateX(18px);
 }
 
-input:checked+.slider:before {
-  transform: translateX(20px);
-}
-
-.config-footer {
+.modal-footer {
+  padding: 14px 20px;
+  border-top: 1px solid #e5e7eb;
   display: flex;
   justify-content: flex-end;
-  gap: 12px;
-  padding: 16px 24px;
-  border-top: 1px solid var(--border-color);
-  background: var(--bg-secondary);
+  gap: 10px;
+  background: #f9fafb;
 }
 
-.btn-primary,
-.btn-secondary {
-  padding: 8px 16px;
-  border-radius: 6px;
+.btn {
+  padding: 6px 14px;
   font-size: 14px;
-  font-weight: 500;
+  border-radius: 6px;
   cursor: pointer;
-  transition: all 0.2s ease;
 }
 
-.btn-primary {
-  background-color: var(--primary-color);
-  color: rgb(255, 255, 255);
-  border: 1px solid var(--primary-color);
+.btn.primary {
+  background: var(--primary-color);
+  color: white;
+  border: none;
 }
 
-.btn-primary:hover {
-  background-color: var(--primary-color);
-  border-color: var(--primary-color);
-}
-
-.btn-secondary {
-  background-color: transparent;
-  color: var(--text-secondary);
-  border: 1px solid var(--border-color);
-}
-
-.btn-secondary:hover {
-  background-color: var(--bg-hover);
+.btn.ghost {
+  background: transparent;
+  border: 1px solid #d1d5db;
+  color: #374151;
 }
 </style>
