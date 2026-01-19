@@ -98,8 +98,8 @@ function handleScroll() {
   const el = messagesContainer.value
   if (!el) return
 
-  // 用户距离容器底部超过 20px 时禁止自动滚动
-  autoScrollEnabled.value = isNearBottom(el, 20)
+  // 用户距离容器底部超过 100px 时禁止自动滚动
+  autoScrollEnabled.value = isNearBottom(el, 100)
 }
 
 function isNearBottom(el, threshold) {

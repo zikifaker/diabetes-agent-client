@@ -34,8 +34,7 @@ export const useChat = defineStore('chat', () => {
       intermediateSteps: '',
       toolCallResults: [],
       content: '',
-      // 对应的用户消息中的上传文件，用于渲染文件处理动画
-      uploadedFiles: data.uploadedFiles || []
+      parsingUploadedFiles: false
     }
 
     try {
@@ -91,6 +90,14 @@ export const useChat = defineStore('chat', () => {
     if (!streamingMessage.value) return
 
     switch (event.type) {
+      case 'parsing_uploaded_files':
+        streamingMessage.value.parsingUploadedFiles = true
+        break
+
+      case 'parsing_uploaded_files_complete':
+        streamingMessage.value.parsingUploadedFiles = false
+        break
+
       case 'intermediate_steps':
         streamingMessage.value.intermediateSteps += event.content
         break

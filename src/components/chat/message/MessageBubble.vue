@@ -24,7 +24,7 @@
         </div>
       </div>
 
-      <div v-if="isFileParsing" class="file-parsing-animation">
+      <div v-if="message.role === 'ai' && message.parsingUploadedFiles" class="file-parsing-animation">
         <div class="parsing-dots">
           <div class="parsing-text">解析文件中</div>
           <span class="dot"></span>
@@ -105,14 +105,6 @@ marked.setOptions({
 })
 
 const userAvatar = computed(() => authStore.user?.avatar || '')
-
-const isFileParsing = computed(() => {
-  return (
-    props.message.role === 'ai' &&
-    props.message.uploadedFiles?.length > 0 &&
-    !props.message.thinkingComplete
-  )
-})
 
 const isThinking = computed(() => {
   return props.streaming && !props.message.thinkingComplete
