@@ -3,6 +3,10 @@
     <MenuSidebar :sidebar-visible="sidebarVisible" @toggle-sidebar="toggleSidebar" />
 
     <main class="main-content" :class="{ 'sidebar-hidden': !sidebarVisible }">
+      <div class="chat-header">
+        <LLMSelector v-model:modelValue="selectedLLM" :llm-options="llmOptions" class="llm-selector" />
+      </div>
+
       <div class="hero-section">
         <div class="empty-state">
           <div class="empty-state-icon">
@@ -14,7 +18,8 @@
       </div>
 
       <div class="input-area-wrapper">
-        <ChatInput @send="onSend" @stop="chatStore.handleStop" :loading="isLoading" :disableFileUploadButton="true" />
+        <ChatInput @send="onSend" @stop="chatStore.handleStop" :model="selectedLLM.id" :loading="isLoading"
+          :disableFileUploadButton="true" />
       </div>
     </main>
   </div>
@@ -26,15 +31,19 @@ import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useChat } from '@/stores/chat'
 import { useSessionStore } from '@/stores/session'
+import { useLLMOptionsStore } from '@/stores/llm_options'
 import MenuSidebar from '@/components/layout/MenuSidebar.vue'
 import ChatInput from '@/components/chat/input/ChatInput.vue'
+import LLMSelector from '@/components/chat/input/LLMSelector.vue'
 import { MainIcon } from '@/components/icons'
 
 const chatStore = useChat()
 const sessionStore = useSessionStore()
+const llmOptionsStore = useLLMOptionsStore()
 const router = useRouter()
 
 const { isLoading, initialMessage } = storeToRefs(chatStore)
+const { llmOptions, selectedLLM } = storeToRefs(llmOptionsStore)
 const sidebarVisible = ref(true)
 
 function toggleSidebar() {
@@ -73,6 +82,14 @@ async function onSend(data) {
 
 .main-content.sidebar-hidden {
   margin-left: 0;
+}
+
+.chat-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 24px;
+  background: var(--white);
 }
 
 .hero-section {

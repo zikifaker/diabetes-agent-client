@@ -151,7 +151,7 @@ watch(() => props.modelValue, (newVal) => {
   width: 320px;
   max-height: 400px;
   overflow-y: auto;
-  background: var(--bg-color);
+  background: var(--hover-bg);
   border: 1px solid var(--border-color);
   border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);

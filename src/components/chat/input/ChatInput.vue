@@ -79,6 +79,10 @@ const props = defineProps({
   disableFileUploadButton: {
     type: Boolean,
     default: false
+  },
+  model: {
+    type: String,
+    default: 'qwen3-max'
   }
 })
 
@@ -97,12 +101,16 @@ const toolsOptions = ref([
   {
     label: '糖尿病知识图谱',
     value: 'search_diabetes_knowledge_graph',
+  },
+  {
+    label: "血糖记录查询",
+    value: 'get_blood_glucose_records'
   }
 ])
 
 const agentConfig = ref({
   maxIterations: 5,
-  tools: ['search_diabetes_knowledge_graph']
+  tools: ['search_diabetes_knowledge_graph', 'get_blood_glucose_records']
 })
 
 function handleSend() {
@@ -112,7 +120,10 @@ function handleSend() {
     message: message.value,
     uploadedFiles: uploadedFiles.value.map(f => f.file.name),
     enableKnowledgeBaseRetrieval: enableKnowledgeBaseRetrieval.value,
-    agentConfig: agentConfig.value
+    agentConfig: {
+      ...agentConfig.value,
+      model: props.model
+    }
   })
 
   message.value = ''

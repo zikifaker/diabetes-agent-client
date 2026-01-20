@@ -22,7 +22,7 @@
             </div>
           </div>
 
-          <ChatInput @send="onSend" @stop="chatStore.handleStop" :loading="isLoading" />
+          <ChatInput @send="onSend" @stop="chatStore.handleStop" :loading="isLoading" :model="selectedLLM.id" />
         </div>
         <ToolCallSidebar :visible="isToolCallSidebarVisible" :results="currentToolCallResults"
           @close="closeToolCallSidebar" />
@@ -37,6 +37,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useSessionStore } from '@/stores/session'
 import { useChat } from '@/stores/chat'
+import { useLLMOptionsStore } from '@/stores/llm_options'
 import MenuSidebar from '@/components/layout/MenuSidebar.vue'
 import LLMSelector from '@/components/chat/input/LLMSelector.vue'
 import MessageBubble from '@/components/chat/message/MessageBubble.vue'
@@ -48,6 +49,7 @@ const route = useRoute()
 const router = useRouter()
 const sessionStore = useSessionStore()
 const chatStore = useChat()
+const llmOptionsStore = useLLMOptionsStore()
 
 const {
   isLoading,
@@ -57,23 +59,11 @@ const {
   initialMessage
 } = storeToRefs(chatStore)
 
+const { llmOptions, selectedLLM } = storeToRefs(llmOptionsStore)
+
 const sidebarVisible = ref(true)
 const isToolCallSidebarVisible = ref(false)
 const currentToolCallResults = ref([])
-
-const llmOptions = ref([
-  {
-    id: 'qwen3-max',
-    name: '通义千问3-max',
-    description: '适配复杂场景，达到领域 SOTA 水平'
-  },
-  {
-    id: 'glm-4.7',
-    name: 'GLM-4.7',
-    description: '智谱 AI 最新旗舰模型'
-  }
-])
-const selectedLLM = ref(llmOptions.value[0])
 
 function toggleSidebar() {
   sidebarVisible.value = !sidebarVisible.value
@@ -84,9 +74,6 @@ async function handleNewChat() {
 }
 
 async function onSend(data) {
-  // 设置当前选择的 LLM
-  data.agentConfig.model = selectedLLM.value.id
-
   try {
     await chatStore.handleSend(data, route.params.id)
   } catch (error) {
