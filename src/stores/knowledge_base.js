@@ -20,7 +20,7 @@ export const useKnowledgeBaseStore = defineStore('knowledgeBase', () => {
 
     try {
       const response = await api.get('/kb/metadata')
-      const metadata = response.data.data.metadata || []
+      const metadata = response.data.data || []
 
       const files = metadata.map(item => ({
         fileName: item.file_name,
@@ -80,7 +80,7 @@ export const useKnowledgeBaseStore = defineStore('knowledgeBase', () => {
       const response = await api.get('/kb/metadata/search', {
         params: { 'query': query }
       })
-      const metadata = response.data.data.metadata || []
+      const metadata = response.data.data || []
       knowledgeFiles.value = metadata.map(item => ({
         fileName: item.file_name,
         fileType: item.file_type,

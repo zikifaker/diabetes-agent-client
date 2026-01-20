@@ -10,7 +10,7 @@ export const useBloodGlucoseStore = defineStore('bloodGlucose', () => {
       const response = await api.get('/blood-glucose/records', {
         params: { start, end }
       })
-      records.value = response.data.data.records || []
+      records.value = response.data.data || []
     } catch (error) {
       throw error
     }

@@ -9,7 +9,7 @@ export const useSessionStore = defineStore('session', () => {
 
   async function fetchSessions() {
     const response = await api.get('/sessions')
-    const sessionsData = response.data.data.sessions || []
+    const sessionsData = response.data.data || []
     sessions.value = sessionsData.map(session => ({
       id: session.session_id,
       title: session.title
@@ -44,7 +44,7 @@ export const useSessionStore = defineStore('session', () => {
 
   async function fetchMessages(sessionId) {
     const response = await api.get(`/session/${sessionId}/messages`)
-    const messagesData = response.data.data.messages || []
+    const messagesData = response.data.data || []
     messages.value = messagesData.map((msg) => ({
       createdAt: new Date(msg.created_at),
       role: msg.role,
