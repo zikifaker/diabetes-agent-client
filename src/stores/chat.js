@@ -99,23 +99,19 @@ export const useChat = defineStore('chat', () => {
         break
 
       case 'intermediate_steps':
-        streamingMessage.value.intermediateSteps += event.content
+        streamingMessage.value.intermediateSteps += parseContent(event.content)
         break
 
       case 'tool_call_results':
-        try {
-          const result = JSON.parse(event.content)
-          streamingMessage.value.toolCallResults.push(result)
-        } catch (e) {
-          console.error('Tool Result Parse Error:', e)
-        }
+        const result = parseContent(event.content)
+        streamingMessage.value.toolCallResults.push(result)
         break
 
       case 'final_answer':
         if (!streamingMessage.value.thinkingComplete) {
           streamingMessage.value.thinkingComplete = true
         }
-        streamingMessage.value.content += event.content
+        streamingMessage.value.content += parseContent(event.content)
         break
 
       case 'done':
@@ -126,6 +122,15 @@ export const useChat = defineStore('chat', () => {
         streamingMessage.value.content = "系统错误，请稍后重试"
         finishStreaming()
         break
+    }
+  }
+
+  function parseContent(rawContent) {
+    try {
+      const parsed = JSON.parse(rawContent)
+      return typeof parsed === 'object' ? (parsed.content ?? rawContent) : parsed
+    } catch {
+      return rawContent
     }
   }
 
