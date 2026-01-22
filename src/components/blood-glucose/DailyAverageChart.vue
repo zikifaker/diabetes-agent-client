@@ -22,7 +22,7 @@ const props = defineProps({
 const grouped = computed(() => {
   const map = {}
   props.records.forEach(r => {
-    const d = r.measured_at.slice(0, 10)
+    const d = r.measuredAt.slice(0, 10)
     map[d] ||= []
     map[d].push(r.value)
   })

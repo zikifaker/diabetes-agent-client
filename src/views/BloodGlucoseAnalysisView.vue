@@ -96,7 +96,7 @@ const filteredRecords = computed(() => {
   const endTs = customDateRange.value.end.getTime()
 
   return records.value.filter(r => {
-    const t = new Date(r.measured_at).getTime()
+    const t = new Date(r.measuredAt).getTime()
     return t >= startTs && t <= endTs
   })
 })

@@ -22,3 +22,13 @@ export function formatLocalDateTime(date) {
     hour12: false
   })
 }
+
+// 格式化时间 HH:mm
+export function formatLocalTimeHour(date) {
+  if (!date) return ''
+  return new Date(date).toLocaleTimeString('zh-CN', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  })
+}

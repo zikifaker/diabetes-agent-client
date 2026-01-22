@@ -8,6 +8,7 @@
 import { computed } from 'vue'
 import { Line } from 'vue-chartjs'
 import { Chart as ChartJS, LineElement, CategoryScale, LinearScale, PointElement, Tooltip } from 'chart.js'
+import { formatLocalTimeHour } from '@/utils/time'
 
 ChartJS.register(LineElement, CategoryScale, LinearScale, PointElement, Tooltip)
 
@@ -25,20 +26,18 @@ const props = defineProps({
 // 获取单日血糖记录
 const dayRecords = computed(() => {
   return props.records
-    .filter((r) => r.measured_at.startsWith(props.date))
-    .sort((a, b) => new Date(a.measured_at) - new Date(b.measured_at));
+    .filter((r) => r.measuredAt.startsWith(props.date))
+    .sort((a, b) => new Date(a.measuredAt) - new Date(b.measuredAt));
 })
 
 const data = computed(() => ({
-  labels: dayRecords.value.map(r =>
-    new Date(r.measured_at).toLocaleTimeString('zh-CN', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false
-    })
-  ),
+  labels: dayRecords.value.map(r => formatLocalTimeHour(r.measuredAt)),
   datasets: [{
-    data: dayRecords.value.map(r => r.value),
+    data: dayRecords.value.map(r => ({
+      x: formatLocalTimeHour(r.measuredAt),
+      y: r.value,
+      diningStatus: r.diningStatus
+    })),
     borderColor: '#e53e3e',
     backgroundColor: 'rgba(229, 62, 62, 0.1)',
     borderWidth: 2,
@@ -49,6 +48,18 @@ const data = computed(() => ({
     pointHoverBorderWidth: 2
   }]
 }))
+
+const diningStatusMap = {
+  'fasting': '空腹',
+  'before_breakfast': '早餐前',
+  'after_breakfast': '早餐后',
+  'before_lunch': '午餐前',
+  'after_lunch': '午餐后',
+  'before_dinner': '晚餐前',
+  'after_dinner': '晚餐后',
+  'bedtime': '睡前',
+  'random': '随机记录'
+}
 
 const options = {
   responsive: true,
@@ -68,6 +79,11 @@ const options = {
       callbacks: {
         label: (context) => `${context.parsed.y.toFixed(1)} mmol/L`,
         title: (context) => context[0].label,
+        afterBody: (context) => {
+          const rawData = context[0].raw;
+          const status = diningStatusMap[rawData.diningStatus] || '未知状态';
+          return `用餐状态: ${status}`
+        }
       }
     }
   },
