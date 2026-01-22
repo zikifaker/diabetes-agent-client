@@ -34,7 +34,8 @@ export const useChat = defineStore('chat', () => {
       intermediateSteps: '',
       toolCallResults: [],
       content: '',
-      parsingUploadedFiles: false
+      parsingUploadedFiles: false,
+      retrievingKnowledgeBase: false
     }
 
     try {
@@ -56,6 +57,7 @@ export const useChat = defineStore('chat', () => {
           enable_knowledge_base_retrieval: data.enableKnowledgeBaseRetrieval
         }),
         signal: abortController.value.signal,
+        openWhenHidden: true,
 
         onmessage(ev) {
           handleStreamEvent({
@@ -90,12 +92,20 @@ export const useChat = defineStore('chat', () => {
     if (!streamingMessage.value) return
 
     switch (event.type) {
-      case 'parsing_uploaded_files':
+      case 'file_parse_start':
         streamingMessage.value.parsingUploadedFiles = true
         break
 
-      case 'parsing_uploaded_files_complete':
+      case 'file_parse_done':
         streamingMessage.value.parsingUploadedFiles = false
+        break
+
+      case 'kb_retrieval_start':
+        streamingMessage.value.retrievingKnowledgeBase = true
+        break
+
+      case 'kb_retrieval_done':
+        streamingMessage.value.retrievingKnowledgeBase = false
         break
 
       case 'intermediate_steps':

@@ -24,13 +24,26 @@
         </div>
       </div>
 
-      <div v-if="message.role === 'ai' && message.parsingUploadedFiles" class="file-parsing-animation">
-        <div class="parsing-dots">
-          <div class="parsing-text">解析文件中</div>
-          <span class="dot"></span>
-          <span class="dot"></span>
-          <span class="dot"></span>
-        </div>
+      <div v-if="message.role === 'ai'" class="parsing-animation">
+        <Transition name="status-fade">
+          <div v-if="message.parsingUploadedFiles" class="status-capsule">
+            <ParsingFilesIcon class="icon" />
+            <span class="status-text">正在解析文件</span>
+            <div class="loading-dots">
+              <span>.</span><span>.</span><span>.</span>
+            </div>
+          </div>
+        </Transition>
+
+        <Transition name="status-fade">
+          <div v-if="message.retrievingKnowledgeBase" class="status-capsule search">
+            <SearchPulseIcon class="icon" />
+            <span class="status-text">正在检索知识库</span>
+            <div class="loading-dots">
+              <span>.</span><span>.</span><span>.</span>
+            </div>
+          </div>
+        </Transition>
       </div>
 
       <div v-if="message.role === 'ai' && message.intermediateSteps" class="thinking-steps">
@@ -80,7 +93,7 @@ import { useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { marked } from 'marked'
 import { AIAvatarIcon, ThinkingCheckmarkIcon, ThinkingToggleIcon, ToolCallResultIcon } from '@/components/icons'
-import { ImageIcon, DefaultFileIcon } from '@/components/icons'
+import { ImageIcon, DefaultFileIcon, ParsingFilesIcon, SearchPulseIcon } from '@/components/icons'
 import { getFileDownloadLink, NAMESPACE } from '@/utils/oss'
 import { formatLocalDateTime } from '@/utils/time'
 
@@ -540,64 +553,78 @@ function showToolCalls() {
   border: none;
 }
 
-.file-parsing-animation {
+.parsing-animation {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   margin: 12px 0;
-  padding: 0 12px;
 }
 
-.parsing-indicator {
+.status-capsule {
   display: inline-flex;
   align-items: center;
+  width: fit-content;
+  padding: 4px 12px;
+  background-color: var(--bg-secondary);
+  border-radius: 100px;
   gap: 8px;
-  padding: 8px 16px;
-  background-color: var(--bg-secondary, #f7f7f8);
-  border-radius: 18px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
 }
 
-.parsing-dots {
+.status-text {
+  font-size: 14px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.icon {
+  color: var(--primary-color);
+  width: 14px;
+  height: 14px;
   display: flex;
   align-items: center;
-  gap: 4px;
-  height: 20px;
+  justify-content: center;
 }
 
-.parsing-dots .dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: var(--primary-color);
-  display: inline-block;
-  animation: bounce 1.4s infinite ease-in-out both;
+.loading-dots {
+  display: flex;
+  color: var(--primary-color);
+  font-weight: bold;
 }
 
-.parsing-dots .dot:nth-child(1) {
-  animation-delay: -0.32s;
+.loading-dots span {
+  animation: opacity-dots 1.4s infinite;
+  opacity: 0;
 }
 
-.parsing-dots .dot:nth-child(2) {
-  animation-delay: -0.16s;
+.loading-dots span:nth-child(2) {
+  animation-delay: 0.2s;
 }
 
-@keyframes bounce {
+.loading-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes opacity-dots {
 
   0%,
-  80%,
   100% {
-    transform: scale(0);
-    opacity: 0.5;
+    opacity: 0;
   }
 
-  40% {
-    transform: scale(1);
+  50% {
     opacity: 1;
   }
 }
 
-.parsing-text {
-  color: var(--text-secondary, #6e6e80);
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 1.4;
+.status-fade-enter-active,
+.status-fade-leave-active {
+  transition: all 0.3s ease;
+}
+
+.status-fade-enter-from,
+.status-fade-leave-to {
+  opacity: 0;
+  transform: translateX(-10px);
 }
 </style>
