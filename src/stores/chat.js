@@ -35,7 +35,8 @@ export const useChat = defineStore('chat', () => {
       toolCallResults: [],
       content: '',
       parsingUploadedFiles: false,
-      retrievingKnowledgeBase: false
+      retrievingKnowledgeBase: false,
+      retrievingKnowledgeBaseChunkNum: 0
     }
 
     try {
@@ -106,6 +107,10 @@ export const useChat = defineStore('chat', () => {
 
       case 'kb_retrieval_done':
         streamingMessage.value.retrievingKnowledgeBase = false
+        break
+
+      case 'kb_retrieval_chunk_num':
+        streamingMessage.value.retrievingKnowledgeBaseChunkNum = Number(parseContent(event.content))
         break
 
       case 'intermediate_steps':

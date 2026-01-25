@@ -38,10 +38,18 @@
         <Transition name="status-fade">
           <div v-if="message.retrievingKnowledgeBase" class="status-capsule search">
             <SearchPulseIcon class="icon" />
-            <span class="status-text">正在检索知识库</span>
-            <div class="loading-dots">
-              <span>.</span><span>.</span><span>.</span>
-            </div>
+            <template v-if="message.retrievingKnowledgeBaseChunkNum">
+              <span class="status-text">正在检索知识库 ({{ message.retrievingKnowledgeBaseChunkNum }}个文档)</span>
+              <div class="loading-dots">
+                <span>.</span><span>.</span><span>.</span>
+              </div>
+            </template>
+            <template v-else>
+              <span class="status-text">正在检索知识库</span>
+              <div class="loading-dots">
+                <span>.</span><span>.</span><span>.</span>
+              </div>
+            </template>
           </div>
         </Transition>
       </div>
@@ -72,8 +80,7 @@
         </transition>
       </div>
 
-      <div v-if="message.role === 'ai' && message.toolCallResults && message.toolCallResults.length > 0"
-        class="tool-call-trigger">
+      <div v-if="message.role === 'ai' && !isThinking && message.toolCallResults?.length" class="tool-call-trigger">
         <button @click="showToolCalls" class="btn-tool-call">
           <ToolCallResultIcon />
           <span>查看工具调用结果</span>
@@ -93,7 +100,7 @@ import { useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { marked } from 'marked'
 import {
-  AIAvatarIcon, ThinkingCheckmarkIcon, ThinkingToggleIcon, 
+  AIAvatarIcon, ThinkingCheckmarkIcon, ThinkingToggleIcon,
   ToolCallResultIcon, ParsingFilesIcon, SearchPulseIcon
 } from '@/icons/chat/message'
 import { ImageIcon, DefaultFileIcon } from '@/icons/chat/input'
@@ -622,7 +629,7 @@ function showToolCalls() {
 
 .status-fade-enter-active,
 .status-fade-leave-active {
-  transition: all 0.3s ease;
+  transition: all 1.2s ease;
 }
 
 .status-fade-enter-from,
