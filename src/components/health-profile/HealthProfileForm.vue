@@ -122,9 +122,9 @@ async function saveProfile() {
       await healthProfileStore.createProfile(profile.value)
     }
     isEditing.value = false
-    showToast('档案保存成功')
+    showToast('档案保存成功', 'success')
   } catch (error) {
-    showToast('档案保存失败')
+    showToast('档案保存失败', 'error')
     console.error('Failed to save profile:', error)
   } finally {
     loading.value = false
