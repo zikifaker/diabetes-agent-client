@@ -32,7 +32,7 @@
           <MainIcon />
         </div>
         <h3>完善健康档案</h3>
-        <p>为了为您提供更精准的饮食建议与血糖分析，请先填写您的健康基础信息。 </p>
+        <p>为了给您提供更精准的治疗建议，请先填写健康档案。 </p>
         <div class="modal-footer">
           <button @click="showProfileModal = false" class="btn-secondary">稍后填写</button>
           <button @click="navigateToHealthProfile" class="btn-primary">
@@ -271,7 +271,7 @@ onMounted(async () => {
 }
 
 .btn-primary {
-  flex: 1.5;
+  flex: 1;
   padding: 12px 20px;
   background: var(--primary-color, #4285F4);
   color: white;

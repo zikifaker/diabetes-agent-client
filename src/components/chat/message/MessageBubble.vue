@@ -89,6 +89,9 @@
 
       <div v-if="message.content" class="message-content-wrapper">
         <div class="message-text markdown-body" v-html="renderMarkdown(message.content)"></div>
+        <button @click="copyMessage" class="copy-button-modern" :data-tooltip="copyTooltip">
+          <CopyIcon />
+        </button>
       </div>
     </div>
   </div>
@@ -104,6 +107,7 @@ import {
   ToolCallResultIcon, ParsingFilesIcon, SearchPulseIcon
 } from '@/icons/chat/message'
 import { ImageIcon, DefaultFileIcon } from '@/icons/chat/input'
+import { CopyIcon } from '@/icons/common'
 import { getFileDownloadLink, NAMESPACE } from '@/utils/oss'
 import { formatLocalDateTime } from '@/utils/time'
 
@@ -116,6 +120,7 @@ const route = useRoute()
 const authStore = useAuthStore()
 
 const showThinking = ref(true)
+const copyTooltip = ref('复制')
 
 const emit = defineEmits(['show-tool-calls'])
 
@@ -174,6 +179,22 @@ function renderMarkdown(content) {
 
 function showToolCalls() {
   emit('show-tool-calls', props.message.toolCallResults)
+}
+
+const copyMessage = async () => {
+  try {
+    await navigator.clipboard.writeText(props.message.content)
+    copyTooltip.value = '已复制!'
+    setTimeout(() => {
+      copyTooltip.value = '复制'
+    }, 2000)
+  } catch (error) {
+    console.error('Failed to copy message:', error)
+    copyTooltip.value = '复制失败'
+    setTimeout(() => {
+      copyTooltip.value = '复制'
+    }, 2000)
+  }
 }
 </script>
 
@@ -407,6 +428,7 @@ function showToolCalls() {
 .message-content-wrapper {
   position: relative;
   padding: 8px 0;
+  margin-bottom: 20px;
 }
 
 .human .message-content-wrapper {
@@ -636,5 +658,75 @@ function showToolCalls() {
 .status-fade-leave-to {
   opacity: 0;
   transform: translateX(-10px);
+}
+
+.copy-button-modern {
+  position: absolute;
+  left: 0;
+  bottom: -28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 6px;
+  background-color: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 10;
+}
+
+.message-content-wrapper:hover .copy-button-modern {
+  opacity: 1;
+}
+
+.copy-button-modern:hover {
+  background-color: var(--hover-bg);
+  color: var(--primary-color);
+}
+
+.copy-button-modern::before,
+.copy-button-modern::after {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.2s ease;
+}
+
+.copy-button-modern::before {
+  content: attr(data-tooltip);
+  top: 130%;
+  margin-top: 4px;
+  padding: 5px 8px;
+  background: #1f2937;
+  color: #ffffff;
+  font-size: 12px;
+  white-space: nowrap;
+  border-radius: 4px;
+}
+
+.copy-button-modern:hover::before {
+  opacity: 1;
+  top: 115%;
+}
+
+.copy-button-modern:hover::after {
+  opacity: 1;
+  top: 85%;
+}
+
+.message-content-wrapper:hover .copy-button-modern {
+  opacity: 1;
+}
+
+.human .copy-button-modern {
+  left: auto;
+  right: 0;
 }
 </style>
