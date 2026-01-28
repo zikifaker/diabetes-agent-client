@@ -11,10 +11,6 @@
           <NewRecordIcon />
           <span>记录血糖</span>
         </button>
-        <button class="report-btn">
-          <ViewReportIcon />
-          <span>查看报告</span>
-        </button>
       </div>
     </header>
 
@@ -59,7 +55,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useBloodGlucoseStore } from '@/stores/blood_glucose'
 import { TimeRangeSelector, AddRecordForm, TargetRateCard, DailyAverageChart, DailyFluctuationChart } from '@/components/blood-glucose'
-import { NewRecordIcon, ViewReportIcon, CalendarIcon } from '@/icons/blood-glucose'
+import { NewRecordIcon, CalendarIcon } from '@/icons/blood-glucose'
 import { formatLocalDate, formatLocalDateTime } from '@/utils/time'
 
 const bloodGlucoseStore = useBloodGlucoseStore()
@@ -232,25 +228,11 @@ onMounted(async () => {
   gap: 6px;
 }
 
-.report-btn {
-  background: white;
-  border: 1px solid #e2e8f0;
-  padding: 10px 18px;
-  border-radius: 10px;
-  font-weight: 500;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.add-btn svg,
-.report-btn svg {
+.add-btn svg {
   flex-shrink: 0;
 }
 
-.add-btn:hover,
-.report-btn:hover {
+.add-btn:hover {
   transform: translateY(-1px);
 }
 

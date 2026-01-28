@@ -74,7 +74,7 @@
           <ThinkingToggleIcon :expanded="showThinking" />
         </div>
         <transition name="slide-fade">
-          <div v-if="showThinking" class="thinking-content">
+          <div v-if="showThinking || isThinking" class="thinking-content">
             <div class="thinking-text">{{ message.intermediateSteps }}</div>
           </div>
         </transition>
@@ -119,7 +119,7 @@ const props = defineProps({
 const route = useRoute()
 const authStore = useAuthStore()
 
-const showThinking = ref(true)
+const showThinking = ref(false)
 const copyTooltip = ref('复制')
 
 const emit = defineEmits(['show-tool-calls'])
