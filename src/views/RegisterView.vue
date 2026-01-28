@@ -2,7 +2,7 @@
   <div class="auth-container">
     <div class="auth-card">
       <h1 class="auth-title">注册</h1>
-      <p class="auth-subtitle">开启AI Agent的体验之旅</p>
+      <p class="auth-subtitle">开始体验 Diabetes Agent</p>
 
       <form @submit.prevent="handleRegister" class="auth-form">
         <div class="form-group">
@@ -19,13 +19,19 @@
           {{ loading ? '注册...' : '注册' }}
         </button>
 
+        <div class="error-wrapper">
+          <Transition name="fade">
+            <div v-if="error" class="error-message">
+              {{ error }}
+            </div>
+          </Transition>
+        </div>
+
         <p class="auth-link">
           已注册?
           <router-link to="/login">登录</router-link>
         </p>
       </form>
-
-      <p v-if="error" class="error-message">{{ error }}</p>
     </div>
   </div>
 </template>
@@ -42,8 +48,11 @@ const email = ref('')
 const password = ref('')
 const loading = ref(false)
 const error = ref('')
+let errorTimer = null
 
 async function handleRegister() {
+  if (errorTimer) clearTimeout(errorTimer)
+
   loading.value = true
   error.value = ''
 
@@ -52,6 +61,9 @@ async function handleRegister() {
     router.push('/')
   } catch (err) {
     error.value = '注册失败'
+    errorTimer = setTimeout(() => {
+      error.value = ''
+    }, 2000)
   } finally {
     loading.value = false
   }
@@ -154,13 +166,41 @@ async function handleRegister() {
   text-decoration: underline;
 }
 
+.error-wrapper {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 8px;
+  position: relative;
+}
+
 .error-message {
-  margin-top: 16px;
-  padding: 12px;
-  background: #fef2f2;
-  color: #dc2626;
+  width: 100%;
+  padding: 8px;
+  background: #fff1f0;
+  border: 1px solid #ffa39e;
+  color: #cf1322;
   border-radius: var(--radius);
-  font-size: 14px;
+  font-size: 13px;
   text-align: center;
+  box-sizing: border-box;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.auth-link {
+  margin-top: 8px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-secondary);
 }
 </style>
