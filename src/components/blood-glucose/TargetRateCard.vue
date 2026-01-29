@@ -80,14 +80,13 @@ const lowRate = computed(() =>
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 16px;
-  margin-bottom: 24px;
 }
 
 .metric-card {
   position: relative;
   background: white;
   border-radius: 12px;
-  padding: 20px;
+  padding: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   overflow: hidden;

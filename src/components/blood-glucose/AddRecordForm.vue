@@ -113,7 +113,7 @@ const handleSubmit = () => {
 .modal-header {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 24px;
+  margin-bottom: 12px;
 }
 
 .modal-header h2 {
@@ -141,7 +141,7 @@ const handleSubmit = () => {
   font-size: 13px;
   font-weight: 600;
   color: #4a5568;
-  margin-bottom: 8px;
+  padding: 10px 6px;
 }
 
 .modern-form input,

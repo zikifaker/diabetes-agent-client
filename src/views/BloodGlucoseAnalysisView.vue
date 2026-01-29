@@ -189,18 +189,18 @@ onMounted(async () => {
 .analysis-wrapper {
   background: #f4f7fa;
   min-height: 100vh;
-  padding: 32px 40px;
+  padding: 24px 32px;
 }
 
 .analysis-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  margin-bottom: 24px;
+  margin-bottom: 12px;
 }
 
 .analysis-header h1 {
-  font-size: 26px;
+  font-size: 24px;
   font-weight: 700;
 }
 
