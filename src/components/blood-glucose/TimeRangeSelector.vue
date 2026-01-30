@@ -52,13 +52,10 @@ const handleTypeChange = (value) => {
 
 const updateRange = (type, value) => {
   const newRange = { ...props.customRange }
-  const d = new Date(value)
   if (type === 'start') {
-    d.setHours(0, 0, 0, 0)
-    newRange.start = d
+    newRange.start = dayjs(value).startOf('day')
   } else {
-    d.setHours(23, 59, 59, 999)
-    newRange.end = d
+    newRange.end = dayjs(value).endOf('day')
   }
   emit('update:customRange', newRange)
 }

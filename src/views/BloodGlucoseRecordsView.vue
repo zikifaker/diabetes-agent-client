@@ -8,7 +8,7 @@
 
       <div class="header-actions">
         <button class="add-btn" @click="showAddButton = true">
-          <NewRecordIcon />
+          <NewIcon />
           <span>记录血糖</span>
         </button>
       </div>
@@ -33,7 +33,8 @@
           <h3 class="card-title">单日血糖波动</h3>
           <div class="date-picker-wrapper">
             <CalendarIcon class="calendar-icon" />
-            <input type="date" v-model="selectedDate" class="date-picker" :min="dayjs(customDateRange.start).format('YYYY-MM-DD')"
+            <input type="date" v-model="selectedDate" class="date-picker"
+              :min="dayjs(customDateRange.start).format('YYYY-MM-DD')"
               :max="dayjs(customDateRange.end).format('YYYY-MM-DD')" />
           </div>
         </div>
@@ -56,7 +57,8 @@ import { storeToRefs } from 'pinia'
 import dayjs from 'dayjs'
 import { useBloodGlucoseStore } from '@/stores/blood_glucose'
 import { TimeRangeSelector, AddRecordForm, TargetRateCard, DailyAverageChart, DailyFluctuationChart } from '@/components/blood-glucose'
-import { NewRecordIcon, CalendarIcon } from '@/icons/blood-glucose'
+import { CalendarIcon } from '@/icons/blood-glucose'
+import { NewIcon } from '@/icons/common'
 
 const bloodGlucoseStore = useBloodGlucoseStore()
 const { records } = storeToRefs(bloodGlucoseStore)
@@ -84,12 +86,11 @@ const displayDateRange = computed(() => {
 })
 
 const filteredRecords = computed(() => {
-  const startTs = customDateRange.value.start.getTime()
-  const endTs = customDateRange.value.end.getTime()
-
+  const start = customDateRange.value.start
+  const end = customDateRange.value.end
   return records.value.filter(r => {
-    const t = new Date(r.measuredAt).getTime()
-    return t >= startTs && t <= endTs
+    const recordTime = dayjs(r.measuredAt)
+    return recordTime.isAfter(start) && recordTime.isBefore(end)
   })
 })
 
@@ -137,12 +138,8 @@ watch(rangeType, (newType) => {
   if (newType === '7d') days = 7
   if (newType === '30d') days = 30
 
-  const start = new Date()
-  start.setDate(start.getDate() - days + 1)
-  start.setHours(0, 0, 0, 0)
-
-  const end = new Date()
-  end.setHours(23, 59, 59, 999)
+  const start = dayjs().subtract(days - 1, 'day').startOf('day')
+  const end = dayjs().endOf('day')
 
   customDateRange.value = { start, end }
 }, { immediate: true })
@@ -150,16 +147,11 @@ watch(rangeType, (newType) => {
 watch(customDateRange, async (newCustom) => {
   const start = new Date(newCustom.start)
   const end = new Date(newCustom.end)
+  const defaultStart = dayjs().subtract(29, 'days').startOf('day')
+  const defaultEnd = dayjs().endOf('day')
 
-  const defaultStart = new Date()
-  defaultStart.setDate(defaultStart.getDate() - 29)
-  defaultStart.setHours(0, 0, 0, 0)
-
-  const defaultEnd = new Date()
-  defaultEnd.setHours(23, 59, 59, 999)
-
-  // 如果自定义日期范围不在最近 30 天内，则重新获取数据
-  if (start < defaultStart || end > defaultEnd) {
+  // 若自定义日期范围不在最近 30 天内，则重新获取数据
+  if (start.isBefore(defaultStart) || end.isAfter(defaultEnd)) {
     try {
       await bloodGlucoseStore.fetchRecords(start.toISOString(), end.toISOString())
     } catch (error) {
@@ -170,12 +162,8 @@ watch(customDateRange, async (newCustom) => {
 
 onMounted(async () => {
   // 默认加载最近 30 天的数据
-  const defaultStart = new Date()
-  defaultStart.setDate(defaultStart.getDate() - 29)
-  defaultStart.setHours(0, 0, 0, 0)
-
-  const defaultEnd = new Date()
-  defaultEnd.setHours(23, 59, 59, 999)
+  const defaultStart = dayjs().subtract(29, 'days').startOf('day')
+  const defaultEnd = dayjs().endOf('day')
 
   try {
     await bloodGlucoseStore.fetchRecords(defaultStart.toISOString(), defaultEnd.toISOString())
