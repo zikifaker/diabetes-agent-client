@@ -61,34 +61,26 @@ export const useKnowledgeBaseStore = defineStore('knowledgeBase', () => {
   }
 
   async function deleteFile(fileName) {
-    try {
-      await api.delete('/kb/metadata', {
-        params: { 'file-name': fileName }
-      })
+    await api.delete('/kb/metadata', {
+      params: { 'file-name': fileName }
+    })
 
-      cachedKnowledgeFiles.value = cachedKnowledgeFiles.value.filter(f => f.fileName !== fileName)
-      knowledgeFiles.value = knowledgeFiles.value.filter(f => f.fileName !== fileName)
+    cachedKnowledgeFiles.value = cachedKnowledgeFiles.value.filter(f => f.fileName !== fileName)
+    knowledgeFiles.value = knowledgeFiles.value.filter(f => f.fileName !== fileName)
 
-      return { success: true, message: '文件删除成功' }
-    } catch (error) {
-      throw error
-    }
+    return { success: true, message: '文件删除成功' }
   }
 
   async function searchFiles(query) {
-    try {
-      const response = await api.get('/kb/metadata/search', {
-        params: { 'query': query }
-      })
-      const metadata = response.data.data || []
-      knowledgeFiles.value = metadata.map(item => ({
-        fileName: item.file_name,
-        fileType: item.file_type,
-        fileSize: item.file_size,
-      }))
-    } catch (error) {
-      throw error
-    }
+    const response = await api.get('/kb/metadata/search', {
+      params: { 'query': query }
+    })
+    const metadata = response.data.data || []
+    knowledgeFiles.value = metadata.map(item => ({
+      fileName: item.file_name,
+      fileType: item.file_type,
+      fileSize: item.file_size,
+    }))
   }
 
   function resetFiles() {

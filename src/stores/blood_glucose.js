@@ -6,31 +6,23 @@ export const useBloodGlucoseStore = defineStore('bloodGlucose', () => {
   const records = ref([])
 
   async function fetchRecords(start, end) {
-    try {
-      const response = await api.get('/blood-glucose/records', {
-        params: { start, end }
-      })
-      const bloodGlucoseRecords = response.data.data || []
-      records.value = bloodGlucoseRecords.map(record => ({
-        value: record.value,
-        measuredAt: record.measured_at,
-        diningStatus: record.dining_status
-      }))
-    } catch (error) {
-      throw error
-    }
+    const response = await api.get('/blood-glucose/records', {
+      params: { start, end }
+    })
+    const bloodGlucoseRecords = response.data.data || []
+    records.value = bloodGlucoseRecords.map(record => ({
+      value: record.value,
+      measuredAt: record.measured_at,
+      diningStatus: record.dining_status
+    }))
   }
 
   async function addRecord(record) {
-    try {
-      await api.post('/blood-glucose/record', {
-        value: record.value,
-        measured_at: record.measuredAt,
-        dining_status: record.diningStatus
-      })
-    } catch (error) {
-      throw error
-    }
+    await api.post('/blood-glucose/record', {
+      value: record.value,
+      measured_at: record.measuredAt,
+      dining_status: record.diningStatus
+    })
   }
 
   return {
