@@ -37,7 +37,7 @@
 
       <div v-else-if="knowledgeFiles.length === 0" class="empty-state">
         <EmptyStateIcon />
-        <p>暂无文件，请上传文件开始使用</p>
+        <p class="empty-state-text">暂无文件，请上传文件开始使用</p>
       </div>
 
       <div v-else class="files-grid">
@@ -241,9 +241,7 @@ function showToast(message, type = 'success') {
     message,
     type
   }
-  setTimeout(() => {
-    toast.value.show = false
-  }, 1500)
+  setTimeout(() => { toast.value.show = false }, 1500)
 }
 
 function toggleFileMenu(fileName) {
@@ -489,6 +487,10 @@ onUnmounted(() => {
   justify-content: center;
   height: 400px;
   color: var(--text-secondary);
+}
+
+.empty-state-text {
+  margin-top: 16px;
 }
 
 .loading-spinner {
@@ -744,14 +746,13 @@ onUnmounted(() => {
 
 .toast {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
-  padding: 12px 20px;
-  border-radius: 6px;
-  color: white;
-  font-size: 13px;
-  font-weight: 500;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  bottom: 30px;
+  right: 30px;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   z-index: 1000;
   animation: slideIn 0.3s ease-out;
   transition: all 0.3s ease;

@@ -196,9 +196,7 @@ function showToast(message, type = 'success') {
     message,
     type
   }
-  setTimeout(() => {
-    toast.value.show = false
-  }, 1500)
+  setTimeout(() => { toast.value.show = false }, 1500)
 }
 
 function openDetail(record) {
@@ -270,6 +268,7 @@ onMounted(fetchMonthRecords)
 
 .subtitle {
   margin-top: 6px;
+  font-size: 14px;
   color: var(--text-secondary);
 }
 
@@ -688,15 +687,14 @@ onMounted(fetchMonthRecords)
 
 .toast {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
-  padding: 12px 20px;
-  border-radius: 6px;
-  color: white;
-  font-size: 13px;
-  font-weight: 500;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  z-index: 2000;
+  bottom: 30px;
+  right: 30px;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
   animation: slideIn 0.3s ease-out;
   transition: all 0.3s ease;
 }
