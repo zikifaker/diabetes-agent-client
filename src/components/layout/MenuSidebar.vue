@@ -21,10 +21,10 @@
         <span class="menu-text">运动记录</span>
       </router-link>
 
-      <!-- <router-link to="/" class="menu-button">
+      <router-link to="/health-weekly-report" class="menu-button">
         <ViewReportIcon />
-        <span class="menu-text">健康报告</span>
-      </router-link> -->
+        <span class="menu-text">健康周报</span>
+      </router-link>
 
       <div class="section-divider">
         <ChatHistoryIcon />

@@ -5,41 +5,47 @@ const routes = [
   {
     path: '/login',
     name: 'Login',
-    component: () => import('../views/LoginView.vue')
+    component: () => import('@/views/LoginView.vue')
   },
   {
     path: '/register',
     name: 'Register',
-    component: () => import('../views/RegisterView.vue')
+    component: () => import('@/views/RegisterView.vue')
   },
   {
     path: '/',
     name: 'Home',
-    component: () => import('../views/HomeView.vue'),
+    component: () => import('@/views/HomeView.vue'),
     meta: { requiresAuth: true }
   },
   {
     path: '/chat/:id?',
     name: 'Chat',
-    component: () => import('../views/ChatView.vue'),
+    component: () => import('@/views/ChatView.vue'),
     meta: { requiresAuth: true }
   },
   {
     path: '/my-knowledge-base',
     name: 'KnowledgeBase',
-    component: () => import('../views/KnowledgeBaseView.vue'),
+    component: () => import('@/views/KnowledgeBaseView.vue'),
     meta: { requiresAuth: true }
   },
   {
     path: '/blood-glucose',
     name: 'BloodGlucose',
-    component: () => import('../views/BloodGlucoseRecordsView.vue'),
+    component: () => import('@/views/BloodGlucoseRecordView.vue'),
     meta: { requiresAuth: true }
   },
   {
     path: '/exercise',
     name: 'Exercise',
-    component: () => import('../views/ExerciseRecordsView.vue'),
+    component: () => import('@/views/ExerciseRecordView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/health-weekly-report',
+    name: 'HealthWeeklyReport',
+    component: () => import('@/views/HealthWeeklyReportView.vue'),
     meta: { requiresAuth: true }
   }
 ]

@@ -5,7 +5,10 @@ export const NAMESPACE = {
   KNOWLEDGE_BASE: 'knowledge-base',
 
   // 聊天文件前缀
-  UPLOAD: 'upload'
+  UPLOAD: 'upload',
+
+  // 健康周报文件前缀
+  HEALTH_WEEKLY_REPORT: 'health-weekly-report'
 }
 
 // 获取文件上传凭证
