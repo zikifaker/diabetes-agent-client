@@ -42,14 +42,26 @@ export async function uploadToOSS(file, policyToken) {
   })
 }
 
-// 获取文件下载链接
-export async function getFileDownloadLink(fileName, namespace, sessionId = null) {
-  const response = await api.get('/oss/download-link', {
-    params: {
-      'file-name': fileName,
-      namespace,
-      'session-id': sessionId
+// 获取文件的预签名 URL
+export async function getPresignedURL(fileName, namespace, options = {}) {
+  const {
+    sessionId = null,
+    useCustomDomain = false
+  } = options
+
+  const params = {
+    'file-name': fileName,
+    namespace,
+    'session-id': sessionId,
+    'use-custom-domain': useCustomDomain
+  }
+
+  Object.keys(params).forEach(key => {
+    if (params[key] == null) {
+      delete params[key]
     }
   })
+
+  const response = await api.get('/oss/presigned-url', { params })
   return response.data.data.url
 }

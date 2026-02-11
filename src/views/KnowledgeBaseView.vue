@@ -103,7 +103,7 @@ import { useKnowledgeBaseStore } from '@/stores/knowledge_base'
 import { storeToRefs } from 'pinia'
 import { SearchIcon, UploadIcon, EmptyStateIcon } from '@/icons/knowledge-base'
 import { CloseIcon, MenuIcon } from '@/icons/common'
-import { getFileDownloadLink, NAMESPACE } from '@/utils/oss'
+import { getPresignedURL, NAMESPACE } from '@/utils/oss'
 
 const knowledgeBaseStore = useKnowledgeBaseStore()
 const { knowledgeFiles, loading, uploading } = storeToRefs(knowledgeBaseStore)
@@ -253,8 +253,12 @@ async function handleDownload(fileName) {
   activeFileMenu.value = null
 
   try {
-    const downloadLink = await getFileDownloadLink(fileName, NAMESPACE.KNOWLEDGE_BASE)
-    window.open(downloadLink, '_blank')
+    const url = await getPresignedURL(fileName, NAMESPACE.KNOWLEDGE_BASE)
+    const link = document.createElement('a')
+    link.href = url
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
     showToast('文件下载成功', 'success')
   } catch (error) {
     console.error('Failed to download file:', error)

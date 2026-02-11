@@ -109,7 +109,7 @@ import {
 } from '@/icons/chat/message'
 import { ImageIcon, DefaultFileIcon } from '@/icons/chat/input'
 import { CopyIcon } from '@/icons/common'
-import { getFileDownloadLink, NAMESPACE } from '@/utils/oss'
+import { getPresignedURL, NAMESPACE } from '@/utils/oss'
 
 const props = defineProps({
   message: Object,
@@ -141,8 +141,14 @@ const isThinking = computed(() => {
 const handleFileClick = async (fileName) => {
   try {
     const sessionId = route.params.id
-    const downloadLink = await getFileDownloadLink(fileName, NAMESPACE.UPLOAD, sessionId)
-    window.open(downloadLink, '_blank')
+    const url = await getPresignedURL(fileName, NAMESPACE.UPLOAD, {
+      sessionId: sessionId
+    })
+    const link = document.createElement('a')
+    link.href = url
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
   } catch (error) {
     console.error('Failed to handle file click:', error)
   }
