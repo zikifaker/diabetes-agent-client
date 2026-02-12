@@ -13,6 +13,7 @@
     "chart.js": "^4.5.1",
     "dayjs": "^1.11.19",
     "element-plus": "^2.11.8",
+    "html2pdf.js": "^0.14.0",
     "marked": "^17.0.0",
     "pinia": "^2.1.7",
     "recordrtc": "^5.6.2",

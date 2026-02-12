@@ -122,7 +122,7 @@ function validateTimeRange() {
 
   if (start.isAfter(end)) {
     timeError.value = '结束时间不能早于开始时间'
-    setTimeout(() => (timeError.value = ''), 2000)
+    setTimeout(() => { timeError.value = '' }, 2000)
     return false
   }
 

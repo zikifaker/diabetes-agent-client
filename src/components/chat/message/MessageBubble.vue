@@ -89,8 +89,13 @@
 
       <div v-if="message.content" class="message-content-wrapper">
         <div class="message-text markdown-body" v-html="renderMarkdown(message.content)"></div>
-        <button v-if="!streaming" @click="copyMessage" class="copy-button-modern" :data-tooltip="copyTooltip">
+        <button v-if="!streaming" @click="copyMessage" class="copy-button-modern action-button"
+          :data-tooltip="copyTooltip">
           <CopyIcon />
+        </button>
+        <button v-if="!streaming && message.role === 'ai'" @click="exportMessage"
+          class="export-button-modern action-button" data-tooltip="导出为 PDF">
+          <ExportIcon />
         </button>
       </div>
     </div>
@@ -103,10 +108,11 @@ import dayjs from 'dayjs'
 import { useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { marked } from 'marked'
+import html2pdf from 'html2pdf.js'
 import {
   AIAvatarIcon, ThinkingCheckmarkIcon, ThinkingToggleIcon,
   ToolCallResultIcon, ParsingFilesIcon, SearchPulseIcon,
-  CopyIcon
+  CopyIcon, ExportIcon
 } from '@/assets/icons/chat/message'
 import { ImageIcon, DefaultFileIcon } from '@/assets/icons/chat/input'
 import { getPresignedURL, NAMESPACE } from '@/utils/oss'
@@ -201,6 +207,28 @@ const copyMessage = async () => {
       copyTooltip.value = '复制'
     }, 2000)
   }
+}
+
+function exportMessage() {
+  const content = props.message.content
+  const htmlContent = marked(content)
+
+  const element = document.createElement('div')
+  element.className = 'markdown-body'
+  element.style.padding = '40px'
+  element.style.backgroundColor = '#ffffff'
+  element.style.color = '#000000'
+  element.innerHTML = htmlContent
+
+  const opt = {
+    margin: 10,
+    filename: `message-${dayjs().format('YYYYMMDDHHmmss')}.pdf`,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  }
+
+  html2pdf().set(opt).from(element).save()
 }
 </script>
 
@@ -686,17 +714,37 @@ const copyMessage = async () => {
   z-index: 10;
 }
 
-.message-content-wrapper:hover .copy-button-modern {
+.export-button-modern {
+  position: absolute;
+  left: 32px;
+  bottom: -28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 6px;
+  background-color: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 10;
+}
+
+.message-content-wrapper:hover .action-button {
   opacity: 1;
 }
 
-.copy-button-modern:hover {
+.action-button:hover {
   background-color: var(--hover-bg);
   color: var(--primary-color);
 }
 
-.copy-button-modern::before,
-.copy-button-modern::after {
+.action-button::before,
+.action-button::after {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
@@ -705,7 +753,7 @@ const copyMessage = async () => {
   transition: all 0.2s ease;
 }
 
-.copy-button-modern::before {
+.action-button::before {
   content: attr(data-tooltip);
   top: 130%;
   margin-top: 4px;
@@ -717,22 +765,23 @@ const copyMessage = async () => {
   border-radius: 4px;
 }
 
-.copy-button-modern:hover::before {
+.action-button:hover::before {
   opacity: 1;
   top: 115%;
 }
 
-.copy-button-modern:hover::after {
+.action-button:hover::after {
   opacity: 1;
   top: 85%;
-}
-
-.message-content-wrapper:hover .copy-button-modern {
-  opacity: 1;
 }
 
 .human .copy-button-modern {
   left: auto;
   right: 0;
+}
+
+.human .export-button-modern {
+  left: auto;
+  right: 32px;
 }
 </style>
