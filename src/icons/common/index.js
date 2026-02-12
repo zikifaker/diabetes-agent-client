@@ -1,8 +1,0 @@
-export { default as CloseIcon } from './CloseIcon.vue'
-export { default as MainIcon } from './MainIcon.vue'
-export { default as MenuIcon } from './MenuIcon.vue'
-export { default as EditIcon } from './EditIcon.vue'
-export { default as CopyIcon } from './CopyIcon.vue'
-export { default as NewIcon } from './NewIcon.vue'
-export { default as TrashIcon } from './TrashIcon.vue'
-export { default as DownloadIcon } from './DownloadIcon.vue'

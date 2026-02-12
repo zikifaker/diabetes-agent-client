@@ -20,7 +20,7 @@
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import RecordRTC from 'recordrtc'
 import api from '@/services/api'
-import { VoiceInputIcon } from '@/icons/chat/input'
+import { VoiceInputIcon } from '@/assets/icons/chat/input'
 
 const props = defineProps({
   isListening: {

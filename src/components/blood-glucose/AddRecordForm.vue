@@ -43,7 +43,7 @@
 <script setup>
 import { ref } from 'vue'
 import dayjs from 'dayjs'
-import { CloseIcon } from '@/icons/common'
+import { CloseIcon } from '@/assets/icons/common'
 import { DINING_STATUS_OPTIONS } from '@/constants/blood_glucose'
 
 const props = defineProps({

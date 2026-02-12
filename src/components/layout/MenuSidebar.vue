@@ -112,8 +112,8 @@ import {
   NewChatIcon, KnowledgeBaseIcon, BloodGlucoseIcon,
   HealthProfileIcon, ChatHistoryIcon, LogoutIcon,
   ViewReportIcon, ExerciseIcon
-} from '@/icons/navigation'
-import { MenuIcon, CloseIcon } from '@/icons/common'
+} from '@/assets/icons/navigation'
+import { MenuIcon, CloseIcon } from '@/assets/icons/common'
 
 defineProps({
   sidebarVisible: Boolean

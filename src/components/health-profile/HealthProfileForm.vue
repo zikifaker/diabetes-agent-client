@@ -160,7 +160,7 @@
 import { ref, watch, computed, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useHealthProfileStore } from '@/stores/health_profile'
-import { EditIcon, CloseIcon } from '@/icons/common'
+import { EditIcon, CloseIcon } from '@/assets/icons/common'
 
 const emit = defineEmits(['close'])
 

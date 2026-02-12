@@ -33,7 +33,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import { FileUploadIcon } from '@/icons/chat/input'
+import { FileUploadIcon } from '@/assets/icons/chat/input'
 
 const props = defineProps({
   disabled: {

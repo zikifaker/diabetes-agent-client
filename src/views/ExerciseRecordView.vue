@@ -91,7 +91,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import dayjs from 'dayjs'
 import { storeToRefs } from 'pinia'
 import { useExerciseStore } from '@/stores/exercise'
-import { NewIcon, TrashIcon } from '@/icons/common'
+import { NewIcon, TrashIcon } from '@/assets/icons/common'
 import { AddRecordForm, RecordDetailModal } from '@/components/exercise'
 import { getExerciseTypeLabel } from '@/constants/exercise'
 

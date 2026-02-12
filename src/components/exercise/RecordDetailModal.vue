@@ -26,7 +26,7 @@
 import dayjs from 'dayjs'
 import { computed } from 'vue'
 import { getExerciseIntensityLabel, getExerciseTypeLabel } from '@/constants/exercise'
-import { CloseIcon } from '@/icons/common'
+import { CloseIcon } from '@/assets/icons/common'
 
 const props = defineProps({
   show: {

@@ -40,7 +40,7 @@ import { useChat } from '@/stores/chat'
 import { MenuSidebar, ToolCallSidebar } from '@/components/layout'
 import { LLMSelector, ChatInput } from '@/components/chat/input'
 import { MessageBubble } from '@/components/chat/message'
-import { MenuSidebarToggleIcon } from '@/icons/navigation'
+import { MenuSidebarToggleIcon } from '@/assets/icons/navigation'
 import { LLM_OPTIONS } from '@/constants/chat'
 
 const route = useRoute()

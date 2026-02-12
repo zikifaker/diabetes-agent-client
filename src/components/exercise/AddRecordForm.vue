@@ -85,7 +85,7 @@ import dayjs from 'dayjs'
 import duration from 'dayjs/plugin/duration'
 import { reactive, watch, ref } from 'vue'
 import { EXERCISE_TYPE_OPTIONS, EXERCISE_INTENSITY_OPTIONS } from '@/constants/exercise'
-import { CloseIcon } from '@/icons/common'
+import { CloseIcon } from '@/assets/icons/common'
 
 dayjs.extend(duration)
 

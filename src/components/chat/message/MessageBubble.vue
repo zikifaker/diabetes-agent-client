@@ -106,9 +106,9 @@ import { marked } from 'marked'
 import {
   AIAvatarIcon, ThinkingCheckmarkIcon, ThinkingToggleIcon,
   ToolCallResultIcon, ParsingFilesIcon, SearchPulseIcon
-} from '@/icons/chat/message'
-import { ImageIcon, DefaultFileIcon } from '@/icons/chat/input'
-import { CopyIcon } from '@/icons/common'
+} from '@/assets/icons/chat/message'
+import { ImageIcon, DefaultFileIcon } from '@/assets/icons/chat/input'
+import { CopyIcon } from '@/assets/icons/common'
 import { getPresignedURL, NAMESPACE } from '@/utils/oss'
 
 const props = defineProps({

@@ -35,8 +35,8 @@
 </template>
 
 <script setup>
-import { DefaultFileIcon, ImageIcon } from '@/icons/chat/input'
-import { CloseIcon } from '@/icons/common'
+import { DefaultFileIcon, ImageIcon } from '@/assets/icons/chat/input'
+import { CloseIcon } from '@/assets/icons/common'
 
 const props = defineProps({
   files: {

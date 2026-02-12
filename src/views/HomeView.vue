@@ -36,8 +36,8 @@ import { useChat } from '@/stores/chat'
 import { useSessionStore } from '@/stores/session'
 import { MenuSidebar } from '@/components/layout'
 import { LLMSelector, ChatInput } from '@/components/chat/input'
-import { MainIcon } from '@/icons/common'
-import { MenuSidebarToggleIcon } from '@/icons/navigation'
+import { MainIcon } from '@/assets/icons/common'
+import { MenuSidebarToggleIcon } from '@/assets/icons/navigation'
 import { LLM_OPTIONS } from '@/constants/chat'
 
 const chatStore = useChat()

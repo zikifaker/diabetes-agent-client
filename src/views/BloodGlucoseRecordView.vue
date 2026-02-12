@@ -57,8 +57,8 @@ import { storeToRefs } from 'pinia'
 import dayjs from 'dayjs'
 import { useBloodGlucoseStore } from '@/stores/blood_glucose'
 import { TimeRangeSelector, AddRecordForm, TargetRateCard, DailyAverageChart, DailyFluctuationChart } from '@/components/blood-glucose'
-import { CalendarIcon } from '@/icons/blood-glucose'
-import { NewIcon } from '@/icons/common'
+import { CalendarIcon } from '@/assets/icons/blood-glucose'
+import { NewIcon } from '@/assets/icons/common'
 
 const bloodGlucoseStore = useBloodGlucoseStore()
 const { records } = storeToRefs(bloodGlucoseStore)
