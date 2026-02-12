@@ -160,7 +160,8 @@
 import { ref, watch, computed, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useHealthProfileStore } from '@/stores/health_profile'
-import { EditIcon, CloseIcon } from '@/assets/icons/common'
+import { CloseIcon } from '@/assets/icons/common'
+import { EditIcon } from '@/assets/icons/navigation'
 
 const emit = defineEmits(['close'])
 
@@ -252,7 +253,7 @@ function cancelEdit() {
 
 function showToast(message, type = 'success') {
   toast.value = { show: true, message, type }
-  setTimeout(() => {toast.value.show = false}, 1500)
+  setTimeout(() => { toast.value.show = false }, 1500)
 }
 
 watch(healthProfile, (val) => {
