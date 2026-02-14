@@ -330,7 +330,7 @@ onUnmounted(() => {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background: var(--white);
+  background: #f4f7fa;
 }
 
 .header {

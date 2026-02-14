@@ -2,7 +2,7 @@
   <div class="auth-container">
     <div class="auth-card">
       <h1 class="auth-title">登录</h1>
-      <p class="auth-subtitle">开始体验 Diabetes Agent</p>
+      <p class="auth-subtitle">欢迎使用 Diabetes Agent</p>
 
       <form @submit.prevent="handleLogin" class="auth-form">
         <div class="form-group">

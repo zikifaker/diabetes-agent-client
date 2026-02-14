@@ -47,6 +47,12 @@ const routes = [
     name: 'HealthWeeklyReport',
     component: () => import('@/views/HealthWeeklyReportView.vue'),
     meta: { requiresAuth: true }
+  },
+  {
+    path: '/system-message',
+    name: 'SystemMessage',
+    component: () => import('@/views/SystemMessageView.vue'),
+    mata: { requiresAuth: true }
   }
 ]
 

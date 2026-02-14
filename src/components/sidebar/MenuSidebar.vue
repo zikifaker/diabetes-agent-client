@@ -69,6 +69,15 @@
               <HealthProfileIcon />
               <span class="dropdown-text">健康档案</span>
             </button>
+
+            <router-link to="/system-message" class="dropdown-item">
+              <BellIcon />
+              <span class="dropdown-text">消息中心</span>
+              <span v-if="messageStore.unreadCount > 0" class="unread-badge">
+                {{ unreadCountDisplay }}
+              </span>
+            </router-link>
+
             <button @click="handleLogout" class="dropdown-item">
               <LogoutIcon />
               <span class="dropdown-text">退出登录</span>
@@ -103,15 +112,16 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useSessionStore } from '@/stores/session'
+import { useSystemMessageStore } from '@/stores/system_message'
 import { HealthProfileForm } from '@/components/health-profile'
 import {
   NewChatIcon, KnowledgeBaseIcon, BloodGlucoseIcon,
   HealthProfileIcon, ChatHistoryIcon, LogoutIcon,
-  ViewReportIcon, ExerciseIcon
+  ViewReportIcon, ExerciseIcon, BellIcon
 } from '@/assets/icons/navigation'
 import { MenuIcon, CloseIcon } from '@/assets/icons/common'
 
@@ -125,6 +135,7 @@ const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
 const sessionStore = useSessionStore()
+const messageStore = useSystemMessageStore()
 
 const showUserMenu = ref(false)
 const showHealthProfile = ref(false)
@@ -135,6 +146,11 @@ const sessionToDelete = ref(null)
 const editingSessionId = ref(null)
 const editingTitle = ref('')
 const renameInput = ref(null)
+
+const unreadCountDisplay = computed(() => {
+  const count = messageStore.unreadCount
+  return count > 99 ? '99+' : count
+})
 
 function toggleUserMenu() {
   showUserMenu.value = !showUserMenu.value
@@ -239,6 +255,12 @@ onMounted(async () => {
     await sessionStore.fetchSessions()
   } catch (error) {
     console.error('Failed to fetch sessions:', error)
+  }
+
+  try {
+    await messageStore.fetchUnreadCount()
+  } catch (error) {
+    console.error('Failed to fetch unread message count:', error)
   }
 })
 
@@ -519,6 +541,7 @@ button.menu-button {
   display: flex;
   align-items: center;
   gap: 10px;
+  text-decoration: none;
   padding: 12px 16px;
   color: var(--text-primary);
   font-size: 14px;
@@ -526,6 +549,21 @@ button.menu-button {
   background: none;
   border: none;
   cursor: pointer;
+}
+
+.unread-badge {
+  background-color: #ff4d4f;
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 10px;
+  min-width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(255, 77, 79, 0.3);
 }
 
 .dropdown-item:hover {
